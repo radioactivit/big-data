@@ -93,9 +93,10 @@ services:
 
   happybase:
     container_name: happybase
+    build:
+      context: ./happybaseDocker
     networks: ["vnet"]
     hostname: happybase.vnet
-    image: python:alpine
     depends_on: ["hbasethrift"]
 
 networks:

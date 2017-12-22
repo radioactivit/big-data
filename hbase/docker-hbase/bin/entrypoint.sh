@@ -90,11 +90,15 @@ elif [ "$1" == "thrift" ]; then
 
     wait_until ${HBASE_REGIONSERVER1_HOSTNAME} 16020
 
-    echo "`date` Starting thirft on `hostname`"
+    echo "`date` Starting thrift on `hostname`"
     echo "`ulimit -a`" 2>&1
 
     exec su-exec hbase hbase thrift "$@" start
 
+elif [ "$1" == "happybase" ]; then
+    shift
+    exec sudo pip install --upgrade setuptools && sudo pip install happybase
+    exec sleep infinity
 fi
 
 exec "$@"

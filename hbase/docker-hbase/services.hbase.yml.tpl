@@ -57,4 +57,5 @@ services:
     hostname: happybase.${network_name}
     image: python:alpine
     depends_on: ["hbasethrift"]
+    command: happybase
 ##/ hbasethrift
