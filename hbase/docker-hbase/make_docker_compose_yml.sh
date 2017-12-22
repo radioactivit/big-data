@@ -43,7 +43,7 @@ nodemanager=${nodemanager:-${datanode}}
 # hbase scale size
 hmaster=${hmaster:-${namenode}}
 regionserver=${regionserver:-${datanode}}
-hbasethrift=${hbasethrift:-0}
+hbasethrift=${hbasethrift:-1}
 
 # drill scale size
 drillbit=${drillbit:-1}
@@ -87,7 +87,7 @@ for component in $@; do
             | sed -e '/^## '${k}'/,/^##\/ '${k}'/!d' \
             | sed -e '/^##/d' \
         )  
-        
+
         KK=$(echo $k | tr '[a-z]' '[A-Z]')
 
         debug $k $KK
@@ -96,6 +96,15 @@ for component in $@; do
         debug $KK scale_size: $scale_size
         
         for i in `seq 1 ${scale_size}`; do 
+
+            #if [ ${k} == "hbasethrift" ]; then
+            #if [ ${component} == "hbase" ]; then
+            #    echo "#####################################"
+            #    echo "${component} / ${k} => ${i} VS ${scale_size}"
+            #    echo "#####################################"
+            #fi
+            #fi
+
             if [ ${i} -gt ${scale_size} ]; then
                 break
             fi

@@ -28,7 +28,6 @@ services:
     hostname: regionserver-${i}.${network_name}
     image: smizy/hbase:1.2.6-alpine
     expose: [16020, 16030]
-    port: [9090,9095]
     depends_on: ["zookeeper-1"]
     environment:
       - SERVICE_16020_NAME=regionserver
@@ -39,16 +38,23 @@ services:
 ##/ regionserver
 
 ## hbasethrift
-  hbasethrift-${i}:
-    container_name: hbasethrift-${i}
+  hbasethrift:
+    container_name: hbasethrift
     networks: ["${network_name}"]
-    hostname: hbasethift-${i}.${network_name}
+    hostname: thrift.${network_name}
     image: smizy/hbase:1.2.6-alpine
     ports: [9090]
     depends_on: ["regionserver-1"]
     environment:
-      - SERVICE_9090_NAME=hbasethirft
+      - SERVICE_9090_NAME=hbasethrift
       - HBASE_ZOOKEEPER_QUORUM=${ZOOKEEPER_QUORUM}
       ${SWARM_FILTER_HBASETHRIFT_${i}}
     command: thrift
-##/ hbasethirft
+
+  happybase:
+    container_name: happybase
+    networks: ["${network_name}"]
+    hostname: happybase.${network_name}
+    image: python:alpine
+    depends_on: ["hbasethrift"]
+##/ hbasethrift
