@@ -1,0 +1,69 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+familles = {
+    'genre':   {'genre':13, 'espece':11, 'nom_commun':16, 'variete':12},
+    'infos':   {'date_plantation':14, 'hauteur':8, 'circonference':7},
+    'adresse': {'geopoint':18, 'arrondissement':3, 'adresse':5}}
+
+import happybase
+import sys
+
+table_name = "arbre_paris"
+
+
+connection = happybase.Connection('hbasethrift')
+table = connection.table(table_name)
+
+
+#column_name = '{fam}:hauteur'.format(fam="infos")
+#for key, row in table.scan():
+#    print('\t{}: {}'.format(key, row[column_name.encode('utf-8')]))
+
+
+
+#Afficher le genre de l’arbre arbre-5410
+print('Recupérer l\'arbre 5410')
+key = 'arbre-5410'.encode('utf-8')
+column_family_name = 'genre'
+column_name = '{fam}:genre'.format(fam=column_family_name)
+row = table.row(key)
+print row
+print('\t{}: {}'.format(key, row[column_name.encode('utf-8')]))
+
+
+#Afficher les valeurs de la famille infos de l’arbre arbre-5424
+print('Recupérer l\'arbre 5424')
+key = 'arbre-5424'.encode('utf-8')
+row = table.row(key, columns=[b'infos'])
+print row
+
+#Afficher l’année de plantation des arbres dont le genre est platanes
+print('L\'année de plantation des 200 premiers platanes')
+for key, data in table.scan(limit=200, columns=["genre:nom_commun","infos:date_plantation"], filter="SingleColumnValueFilter('genre','nom_commun',=, 'binary:Marronnier',true,true)"):
+    print(key, data)
+
+# Afficher la hauteur des arbres dont le genre est “Quercus”.
+print('Hauteur des Quercus')
+for key, data in table.scan(limit=200, columns=["genre:genre","infos:hauteur"], filter="SingleColumnValueFilter('genre','genre',=, 'binary:Quercus',true,true)"):
+    print(key, data)
+
+# Afficher les noms communs des arbres du 13e arrondissement.
+print('Hauteur des Quercus')
+for key, data in table.scan(limit=200, columns=["adresse:arrondissement","genre:nom_commun"], filter="SingleColumnValueFilter('adresse','arrondissement',=, 'substring:13',true,true)"):
+    print(key, data)
+#Example1: >, 'binary:abc' will match everything that is lexicographically greater than "abc"
+#Example2: =, 'binaryprefix:abc' will match everything whose first 3 characters are lexicographically equal to "abc"
+#Example3: !=, 'regexstring:ab*yz' will match everything that doesn't begin with "ab" and ends with "yz"
+#Example4: =, 'substring:abc123' will match everything that begins with the substring "abc123"
+
+#Afficher la hauteur des arbres plantés avant l’année 1800
+print('Hauteur des vieux arbres')
+for key, data in table.scan(limit=200, columns=["infos:hauteur","infos:date_plantation","adresse:arrondissement","genre:nom_commun"], filter="SingleColumnValueFilter('infos','date_plantation',<, 'binary:1800',true,true) AND SingleColumnValueFilter('infos','date_plantation',>, 'binary:1701',true,true)"):
+#for key, data in table.scan(limit=200, columns=["infos:date_plantation","infos:hauteur"], filter="SingleColumnValueFilter('infos','date_plantation',=,'substring:1800',true,true)"):
+    print(key, data)
+
+#regexstring : hbase_table.scan(filter="SingleColumnValueFilter ('blah','blouh',=,'regexstring:^batman$')")
+#batch
+#timestamp
+
+connection.close()

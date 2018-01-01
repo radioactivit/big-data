@@ -96,6 +96,8 @@ services:
     build:
       context: ./happybaseDocker
     networks: ["vnet"]
+    volumes:
+          - ./happybaseDocker/python:/code
     hostname: happybase.vnet
     depends_on: ["hbasethrift"]
 
