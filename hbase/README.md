@@ -94,3 +94,24 @@ Suppression de tables
 `drop "Bibliotheque"`
 
 ##TP 1 Python/HappyBase
+###Accèder à la console python
+En même temps que la base HBase en cluster simple, le script a lancé un container HappyBase.
+
+Cette image donne accès à un shell avec python et happybase préinstallés ainsi que le reperoire docker-hbase/happybaseDocker/python monté en sur workdir code.
+
+On va commencer par ouvrir les fichiers du repertoire premierExemple dans un editeur de texte local et se connecter au bash du container HappyBase en faisant `docker exec happybase -it bash`
+###Ensuite
+On va executer en python dans l'order étape par étape et dans l'ordre numéroté les 4 fichiers.
+##TP 2 Python/HappyBase
+Même méthode d'accès console que le TP1, on récupère la source de data les-arbres.csv et on va éxécuter ensemble les fichiers. Sur le fichier 3, c'est à vous de travailler.
+##TP3
+CF le readme dans le repetoire phoenix
+##Bonus MapReduce
+On retourne dans python...
+
+Il y a mrjob installer qui permet d'utiliser les taches map/reduce haddop avec python.
+
+### locally
+`python mr_word_freq_count.py ../share/les-arbres.csv > counts`
+### Sur un cluster 
+`python mr_word_freq_count.py ../share/les-arbres.csv -r hadoop > counts`
