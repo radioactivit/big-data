@@ -62,8 +62,40 @@ for key, data in table.scan(limit=200, columns=["infos:hauteur","infos:date_plan
 #for key, data in table.scan(limit=200, columns=["infos:date_plantation","infos:hauteur"], filter="SingleColumnValueFilter('infos','date_plantation',=,'substring:1800',true,true)"):
     print(key, data)
 
-#regexstring : hbase_table.scan(filter="SingleColumnValueFilter ('blah','blouh',=,'regexstring:^batman$')")
-#batch
-#timestamp
+# changer le nom commun de l’arbre arbre-82 et en faire un "Petit géranium"
+print('Et ici un petit géranium')
+key = 'arbre-82'.encode('utf-8')
+row = table.put.put(key, {"genre:nom_commun": "Petit géranium"})
+row = table.row(key)
+print row
+
+# Update en batch tous les arbres plantés entre 1914 et 1918 et leur rajouté dans infos:evenement l'intitulé "guerre"
+print('Les arbres de la guerre')
+batch = table.batch(1000);
+for key, data in table.scan(limit=200, columns=["infos:hauteur","infos:date_plantation","adresse:arrondissement","genre:nom_commun"], filter="SingleColumnValueFilter('infos','date_plantation',<, 'binary:1919',true,true) AND SingleColumnValueFilter('infos','date_plantation',>, 'binary:1913',true,true)"):
+    batch.put(key, {"infos:evenement": "guerre"})
+batch.send()
+print('On check la guerre')
+row = table.row(key)
+print row
+
+# Update en batch tous les arbres plantés pendant la guerre et leur modifié infos:evenement l'intitulé "grande guerre"
+batch = table.batch(1000);
+for key, data in table.scan(limit=200, columns=["infos:hauteur","infos:date_plantation","adresse:arrondissement","genre:nom_commun"], filter="SingleColumnValueFilter('infos','evenement',=, 'binary:guerre',true,true)"):
+    batch.put(key, {"infos:evenement": "grande guerre"})
+batch.send()
+print('On check la (grande) guerre')
+row = table.row(key)
+print row
+
+# Afficher sur un arbre de la grande guerre toutes les versions de la cellule infos:evenement
+print('On check les guerres d\'une cellule')
+cells = table.cells(key,column='infos:evenement',include_timestamp=True)
+print cells
+
+# Afficher la verion "guerre" d'un des arbres de la grande guerre (attention au timestamp)
+print('On affiche l\'abre à l\'époque de la guerre ')
+row = table.row(key, include_timestamp=True, timestamp=1514976634898)
+print row
 
 connection.close()

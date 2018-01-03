@@ -15,55 +15,152 @@ connection = happybase.Connection('hbasethrift')
 table = connection.table(table_name)
 
 
-#column_name = '{fam}:hauteur'.format(fam="infos")
-#for key, row in table.scan():
-#    print('\t{}: {}'.format(key, row[column_name.encode('utf-8')]))
-
-
-
-#Afficher le genre de l’arbre arbre-5410
-print('Recupérer l\'arbre 5410')
-key = 'arbre-5410'.encode('utf-8')
-column_family_name = 'genre'
-column_name = '{fam}:genre'.format(fam=column_family_name)
+#Un select ONE par ID
+print('Recupérer l\'arbre arbre-19251')
+key = 'arbre-19251'.encode('utf-8')
 row = table.row(key)
 print row
+print('Recupérer le genre et le nom_commun de l\'arbre arbre-19251')
+row = table.row(key,columns=["genre:genre","genre:nom_commun"])
+print row
+
+column_family_name = 'genre'
+column_name = '{fam}:genre'.format(fam=column_family_name)
+
+print('\t{}: {}'.format(key, row[column_name.encode('utf-8')]))
+column_name = '{fam}:nom_commun'.format(fam=column_family_name)
+
 print('\t{}: {}'.format(key, row[column_name.encode('utf-8')]))
 
 
-#Afficher les valeurs de la famille infos de l’arbre arbre-5424
-print('Recupérer l\'arbre 5424')
-key = 'arbre-5424'.encode('utf-8')
-row = table.row(key, columns=[b'infos'])
-print row
-
-#Afficher l’année de plantation des arbres dont le genre est platanes
-print('L\'année de plantation des 200 premiers platanes')
-for key, data in table.scan(limit=200, columns=["genre:nom_commun","infos:date_plantation"], filter="SingleColumnValueFilter('genre','nom_commun',=, 'binary:Marronnier',true,true)"):
+#Un select all limité
+print('Les 50 premiers arbres')
+for key, data in table.scan(limit=50):
     print(key, data)
 
-# Afficher la hauteur des arbres dont le genre est “Quercus”.
-print('Hauteur des Quercus')
-for key, data in table.scan(limit=200, columns=["genre:genre","infos:hauteur"], filter="SingleColumnValueFilter('genre','genre',=, 'binary:Quercus',true,true)"):
+print('Les 50 premiers noms et arondissements des arbres')
+for key, data in table.scan(limit=50, columns=["genre:nom_commun","adresse:arrondissement"]):
     print(key, data)
 
-# Afficher les noms communs des arbres du 13e arrondissement.
-print('Hauteur des Quercus')
-for key, data in table.scan(limit=200, columns=["adresse:arrondissement","genre:nom_commun"], filter="SingleColumnValueFilter('adresse','arrondissement',=, 'substring:13',true,true)"):
+#Un select all limité
+print('Les 50 premiers arbres du 11eme arrondissement')
+for key, data in table.scan(limit=50, columns=["genre:nom_commun","adresse:arrondissement"], filter="SingleColumnValueFilter('adresse','arrondissement',=, 'binary:PARIS 11E ARRDT',true,true)"):
     print(key, data)
+
+
+#Un select all limité
+print('Les 50 arbres à partir de arbre-101334 du 11eme arrondissement')
+for key, data in table.scan(row_start="arbre-101334", limit=50, columns=["genre:nom_commun","adresse:arrondissement"], filter="SingleColumnValueFilter('adresse','arrondissement',=, 'binary:PARIS 11E ARRDT',true,true)"):
+    print(key, data)
+
+
+print('Les arbres à partir de arbre-100368 et jusqu\'à arbre-101334')
+for key, data in table.scan(row_start="arbre-100368", row_stop="arbre-101334", columns=["genre:nom_commun","adresse:arrondissement"]):
+    print(key, data)
+#row_start=None, row_stop=None
+
+
+#50 arbres de plus de 20 mètres
+print('Les 50 premiers arbres de plus de 20 mètres du 11eme')
+for key, data in table.scan(limit=50, columns=["genre:nom_commun","adresse:arrondissement", "infos:hauteur"], filter="SingleColumnValueFilter('adresse','arrondissement',=, 'binary:PARIS 11E ARRDT',true,true) AND SingleColumnValueFilter('infos','hauteur',>, 'binary:20',true,true) AND SingleColumnValueFilter('infos','hauteur',=, 'regexstring:^[0-9][0-9]+',true,true)"):
+    print(key, data)
+#https://regex101.com/
+
 #Example1: >, 'binary:abc' will match everything that is lexicographically greater than "abc"
 #Example2: =, 'binaryprefix:abc' will match everything whose first 3 characters are lexicographically equal to "abc"
 #Example3: !=, 'regexstring:ab*yz' will match everything that doesn't begin with "ab" and ends with "yz"
 #Example4: =, 'substring:abc123' will match everything that begins with the substring "abc123"
 
-#Afficher la hauteur des arbres plantés avant l’année 1800
-print('Hauteur des vieux arbres')
-for key, data in table.scan(limit=200, columns=["infos:hauteur","infos:date_plantation","adresse:arrondissement","genre:nom_commun"], filter="SingleColumnValueFilter('infos','date_plantation',<, 'binary:1800',true,true) AND SingleColumnValueFilter('infos','date_plantation',>, 'binary:1701',true,true)"):
-#for key, data in table.scan(limit=200, columns=["infos:date_plantation","infos:hauteur"], filter="SingleColumnValueFilter('infos','date_plantation',=,'substring:1800',true,true)"):
+#On va éditer le chêne, pour en faire un Chêne-liège
+print('L\'arbre arbre-19251 devient un Chêne-liège')
+table.put(key, {"genre:nom_commun": "Chêne-liège"})
+print('On le vérifie')
+key = 'arbre-19251'.encode('utf-8')
+row = table.row(key)
+print row
+
+# Timestamp
+# Gestion des versions par timestamp
+print('On récupère tous les Chêne-liège avec les timestamps de modif colonne')
+for key, data in table.scan(limit=10, include_timestamp=True, filter="SingleColumnValueFilter('genre','nom_commun',=, 'substring:liège',true,true)"):
     print(key, data)
 
-#regexstring : hbase_table.scan(filter="SingleColumnValueFilter ('blah','blouh',=,'regexstring:^batman$')")
+print('On récupère le dernier Chêne-liège avec les timestamps de modif colonne')
+row = table.row(key, include_timestamp=True)
+print row
+
+#Attention à mettre un timestamp cohérent ICI
+print('On récupère le dernier Chêne-liège avec les timestamps de modif colonne')
+row = table.row(key, include_timestamp=True, timestamp=1514976634898)
+print row
+
+print('On récupère la cellule nom_commun du chêne avec ses versions')
+cells = table.cells(key,column='genre:nom_commun')
+print cells
+
+print('On récupère la cellule nom_commun du chêne avec ses versions et ses timestamps')
+cells = table.cells(key,column='genre:nom_commun',include_timestamp=True)
+print cells
+
+
+#print('Et si on delete?')
+#table.delete(key,columns=['genre:nom_commun'])
+#print('Ben on delete toutes les versions')
+#cells = table.cells(key,column='genre:nom_commun',include_timestamp=True)
+#print cells
+
+
+print('Et si on delete avec un timestamp?')
+#table.put(key, {"genre:nom_commun": "Chêne-liège"})
+#table.put(key, {"genre:nom_commun": "Chêne"})
+#table.put(key, {"genre:nom_commun": "Chêne-liège"})
+#table.put(key, {"genre:nom_commun": "Chêne"})
+cells = table.cells(key,column='genre:nom_commun',include_timestamp=True)
+print cells
+
+
+#Opération sur le TIMESTAMP A FAIRE
+table.delete(key,columns=['genre:nom_commun'],timestamp=1514992471431)
+print('Ben on delete que les versions plus anciennes')
+
+cells = table.cells(key,column='genre:nom_commun',include_timestamp=True)
+print cells
+
+
+sys.exit()
+
+
+
 #batch
+batch = table.batch()
+batch = table.batch(batch_size = 1000)
+
+#batch.delete()
+#On va retirer toutes les dates plantation en 1700-01-01 (seulement les 1000 premières en faites)
+print('On retire les dates de plantations')
+for key, data in table.scan(limit=1000, columns=["infos:date_plantation"], filter="SingleColumnValueFilter('infos','date_plantation',=, 'substring:1700',true,true)"):
+    print(key, data)
+    batch.delete(key,columns=["infos:date_plantation"])
+batch.send()
+print('On constate que ça c\'est bien passé')
+row = table.row(key)
+print row
+
+
+#On va mettre à jour une des infos sur les arbres, genre transformer les marronniers en chataigners
+print('Les marronniers sont maintenant des Châtaigniers')
+for key, data in table.scan(limit=1000, columns=["genre:nom_commun"], filter="SingleColumnValueFilter('genre','nom_commun',=, 'substring:marron',true,true)"):
+    print(key, data)
+    batch.put(key, {"genre:nom_commun": "Chataigner"})
+batch.send()
+print('On constate que ça c\'est bien passé')
+row = table.row(key)
+print row
+
+sys.exit()
+
 #timestamp
+
+
 
 connection.close()
