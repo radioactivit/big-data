@@ -6,7 +6,7 @@
 #
 # // hdfs + hbase setup
 #  ./make_docker_compose_file.sh hdfs hbase > docker-compose.yml
-# 
+#
 # ./make_docker_compose_yml.sh [hdfs] [hbase] [yarn] [drill]
 ###
 
@@ -51,7 +51,7 @@ drillbit=${drillbit:-1}
 debug() {
   [ ${DEBUG} -gt 0 ] && echo "[DEBUG] $@" 1>&2
 }
- 
+
 services=()
 
 zk_quorum=()
@@ -62,40 +62,40 @@ done
 ZOOKEEPER_QUORUM="$(IFS=,; echo "${zk_quorum[*]}")"
 
 zookeeper_arg=0
-for component in $@; do 
+for component in $@; do
     if [ "${component}" == "zookeeper" ]; then
         zookeeper_arg=1
         break
     fi
-done   
+done
 
 if [ $zookeeper_arg -eq 0 ]; then
     set -- zookeeper $@
 fi
 
-for component in $@; do 
+for component in $@; do
     template=services.${component}.yml.tpl
     if [ ! -e ${template} ]; then
         continue
     fi
     debug "Template: $template ..."
-    
+
     service_keys=$(cat $template | sed -e '/^## /!d' | sed -e 's/^##[ ]*//g' )
 
     for k in $service_keys; do
         part=$(cat $template \
             | sed -e '/^## '${k}'/,/^##\/ '${k}'/!d' \
             | sed -e '/^##/d' \
-        )  
+        )
 
         KK=$(echo $k | tr '[a-z]' '[A-Z]')
 
         debug $k $KK
-        
+
         scale_size=${!k}
         debug $KK scale_size: $scale_size
-        
-        for i in `seq 1 ${scale_size}`; do 
+
+        for i in `seq 1 ${scale_size}`; do
 
             #if [ ${k} == "hbasethrift" ]; then
             #if [ ${component} == "hbase" ]; then
@@ -108,12 +108,12 @@ for component in $@; do
             if [ ${i} -gt ${scale_size} ]; then
                 break
             fi
-            swarm_filter="SWARM_FILTER_${KK}_${i}" 
+            swarm_filter="SWARM_FILTER_${KK}_${i}"
             debug $swarm_filter
             # replace template variable
             filter=""
             if [ "${!swarm_filter}" != "" ]; then
-                filter="- ${!swarm_filter}"            
+                filter="- ${!swarm_filter}"
             fi
             _part=$(echo "$part" \
                 | sed -e 's/${i}/'$i'/g' \
@@ -128,7 +128,7 @@ for component in $@; do
     done
 done
 
-# join 
+# join
 docker_compose_services="$(IFS=$'\n'; echo "${services[*]}")"
 
 # output docker-compose.yml v2 format
@@ -141,5 +141,5 @@ $docker_compose_services
 networks:
   $network_name:
     external:
-      name: $network_name 
+      name: $network_name
 EOD
