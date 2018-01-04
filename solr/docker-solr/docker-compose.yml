@@ -1,0 +1,6 @@
+version: '2'
+services:
+  solr:
+    image: solr
+    ports:
+     - "8983:8983"
