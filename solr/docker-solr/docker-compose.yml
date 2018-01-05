@@ -3,4 +3,6 @@ services:
   solr:
     image: solr
     ports:
-     - "8983:8983"
+          - "8983:8983"
+    volumes:
+          - ../share:/opt/solr/share

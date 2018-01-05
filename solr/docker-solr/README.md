@@ -90,7 +90,7 @@ On va faire une recherche de dingue, on va récupérer le titre et l'auteur des 
 
 Par contre, on a pas mal travailler en JSON jusqu'à maintenant, donc on va refaire la première mais en JSON
 
-Pour reproduire la même requête en JSON, on va poster un JSON avec Postman à `http://localhost:8983/solr/demo/query?q=title_t:couleur&fl=author_s,title_t`
+Pour reproduire la même requête en JSON, on va poster un JSON avec Postman à `http://localhost:8983/solr/demo/query`
 
 	{
 	  "query" : "title_t:couleur",
@@ -116,3 +116,165 @@ Bien sur que non. On va faire une requète avec un order et un limite. On appell
 	}
 	
 la version request sera : `http://localhost:8983/solr/demo/query?q=*:*&fq=publisher_s:Bantam&rows=3&sort=pubyear_i desc&fl=title_t,pubyear_i,publisher_s`
+
+#SOLR TP1
+
+Le TP1 va consister en un import d'une base de film noté sur RottenTomatoes et l'utilisation des subtilité de typage et des fonctions d'aggrégation. On refera ensuite le même exercice avec des données choisis dans une base de CSV.
+
+##Import des datas
+
+On va créer la collection movies sur SolR. Pour cela, on se connecte au bash du container docker et on lance la commande `bin/solr create -c movies`, comme on l'a déjà expérimenté, cela créé le core/collection (solR/SolR cloud).
+
+La configuration de la collection se situe dans `/opt/solr/server/solr/movies/conf`. On va faire en sorte de préparer notre import de data pour obtenir un schema 
+
+	<!-- Fields added for rated_movies.csv load-->
+	<field name="film" type="text" indexed="true" stored="true"/>
+	<field name="year" type="pint" indexed="true" stored="true"/>
+	<field name="stars" type="pfloat" indexed="true" stored="true"/>
+	<field name="rating" type="pfloat" indexed="true" stored="true"/>
+	<field name="votes" type="pint" indexed="true" stored="true"/>
+
+Pour ce faire on peut utiliser l'API ou directement l'interface de gestion de SOLR `http://localhost:8983/solr/#/movies/schema`. Ce qu'on va faire.
+
+Lorsque les configurations sont bonnes, on va sur `http://localhost:8983/solr/#/movies/files?file=managed-schema` pour constater que ça a marché et comprendre comme ça fonctionne.
+
+On peut à présent importer le fichier. Pour cela, on va le faire en ligne de commande.
+
+	bin/post -c movies share/rated_movies.csv
+
+On retourne dans la interface solR pour constater que tout s'est importé :
+
+	http://localhost:8983/solr/#/movies
+
+##Manipulation de données
+Dans cet exemple, on utilisera uniquement postman sur l'url de requète du core : `http://localhost:8983/solr/movies/query` en postant du JSON.
+###Récupération d'un film
+On va récupérer le film "jurassic world"
+
+	{
+	  "query" : "film:Jurassic"
+	}
+###Récupération d'un film (mode fuzzy)
+Voyons voir si on peut retrouver les films qui contiennent le mot welcome mais ortographié par l'académie française : 
+
+	{
+	  "query" : "film:Welcaume~"
+	}
+
+###Recherche plain text d'un film
+	{
+	  "query" : "film:New York"
+	}
+###tous les films noté plus de 4 contenant le mot girl
+	{
+	  "query" : "film:girl",
+	  "filter" : "rating:[4 TO *]"
+	}
+
+###Recherche des 5 films les mieux notés
+	{
+	  "query" : "*:*",
+	  "limit" : 5,
+	  "sort" : "rating asc"
+	}
+### recherche des 5 films les mieux notés ayant plus de 50 votes et classés par nombre de voyant décroissant en cas d'égalité
+	{
+	  "query" : "*:*",
+	  "filter" : "votes:[50 TO *]"
+	  "limit" : 5,
+	  "sort" : "rating desc, votes desc"
+	}
+	
+###Les facets
+Les facets permettent de faire des opérations plus complexes dans les recherches proches des aggrégats SQL
+####Moyenne des films de 2014
+	{
+	  "query" : "year:2014",
+	  "facet": {
+	  	"average_rating" : "avg(rating)"
+	  }
+	}
+![Json function](md-img/json_function.png)
+####Le nombre de film par note de plus de 3 sur l'année 2015 
+	{
+		"query" : "year:2015",
+		"facet": {
+			"rating_ranges": {
+				"type" : "range",
+				"field" : "rating",
+				"start" : 3,
+				"end" : 6,
+				"gap" : 1
+			}
+		}
+	}
+
+#### Les nombre de films par année et les 2 années les plus représentés
+Pour faire un range sur une chaine de caractère plutôt que sur un nombre, il faut utiliser le facet term. Par exemple :
+	
+	{
+		"query" : "*:*",
+		{
+			"top_year" : { "terms" : "year" },
+			"two_top_year" : {
+				"type" : "terms",
+				"field" : year,
+				"limit" : 2,
+				"mincount" : 2
+			}
+		}
+	}
+
+####La moyenne des films peu populaire (1 à 10 votes), moyennement populaire (11 à 999 votes) et très populaire (plus de milles votes)
+
+	{
+		"query" : "year:2015",
+		"facet": {
+			"low_popularity" : {
+				"type" : "query",
+				"q" : "votes:[1 TO 10]",
+				"facet" : { "average_rating" : "avg(rating)" }
+			},
+			"med_popularity" : {
+				"type" : "query",
+				"q" : "votes:[11 TO 999]",
+				"facet" : { "average_rating" : "avg(rating)" }
+			}
+			"high_popularity" : {
+				"type" : "query",
+				"q" : "votes:[1000 TO *]",
+				"facet" : { "average_rating" : "avg(rating)" }
+			}
+		}
+	}
+####Pour aller plus loin sur les facets
+Un très bon tutoriel et une bonne base sur SolR :
+[http://yonik.com/json-facet-api/](http://yonik.com/json-facet-api/)
+
+
+##Supression des datas (vidage de l'index)
+Il peut être utile parfois de supprimer des données d'un index. Ci après l'exemple de la suppression de toutes les données : `http://localhost:8983/solr/movies/update/json?commit=true`
+
+	{"delete":{"query":"*:*"}}
+
+##Exercice
+Il vous est demandé de créer un core sur le même container que le TP0 et le TP1
+
+* créer le core tweets
+* En vous aidant du petit fichier miniTweet.csv, typer les fields
+* importer les datas dans share/tweets : BarackObama.csv et realDonaldTrump.csv
+* Ajouter manuellement le dernier tweet en date de @realDonaldTrump et celui de @BarackObama
+* Les 20 derniers tweets de la base par rapport à la date created_at
+* les 20 tweets les plus favoris en mars 2017
+* Les dates minimales et maximales de tweet de la collection
+* Le nombre minimal de retweet pour trump
+* Le nombre maximal de retweet pour Obama
+* La moyenne de retweet pour trump en mars 2017 
+* Chercher tous les tweets parlant de clinton
+* Trouver la répartition des tweets sur clinton entre trump et obama
+* Même question sur l'Obamacare
+* Même question sur l'Obmacare en recherche approximative
+* Les moyennes de replies,retweets,favorites pour les deux users
+* Le nombre de tweets par interval de 1000 retweets
+* Le nombre de tweets par interval de 1000 retweets uniquement sur 2015
+* Supprimer tous les tweets de trump

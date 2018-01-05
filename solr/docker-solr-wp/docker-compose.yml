@@ -35,6 +35,8 @@ services:
       - "8983:8983"
     networks:
       - wordpress-network
+    volumes:
+      - ../share:/opt/solr/share
 networks:
   wordpress-network:
     driver: bridge
