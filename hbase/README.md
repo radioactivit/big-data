@@ -93,6 +93,11 @@ Suppression de tables
 `disable "Bibliotheque"`
 `drop "Bibliotheque"`
 
+Une documentation plutôt bien faite sur les filters et les commande shell: 
+
+* [http://www.hadooptpoint.org/filters-in-hbase-shell/](http://www.hadooptpoint.org/filters-in-hbase-shell/)
+* [http://www.hadooptpoint.org/hbase-shell-commands/](http://www.hadooptpoint.org/hbase-shell-commands/)
+
 ##TP 1 Python/HappyBase
 ###Accèder à la console python
 En même temps que la base HBase en cluster simple, le script a lancé un container HappyBase.
