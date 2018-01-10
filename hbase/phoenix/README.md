@@ -30,7 +30,7 @@ On créé avec vi `us_population.csv`
 	TX,Dallas,1213825
 	CA,San Jose,912332
       
-On créé avec vi `us_population.sql`
+On créé avec vi `us_population_queries.sql`
 
 	SELECT state as "State",count(city) as "City Count",sum(population) as "Population Sum"
 	FROM us_population

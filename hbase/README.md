@@ -105,6 +105,13 @@ En même temps que la base HBase en cluster simple, le script a lancé un contai
 Cette image donne accès à un shell avec python et happybase préinstallés ainsi que le reperoire docker-hbase/happybaseDocker/python monté en sur workdir code.
 
 On va commencer par ouvrir les fichiers du repertoire premierExemple dans un editeur de texte local et se connecter au bash du container HappyBase en faisant `docker exec happybase -it bash`
+
+Documentation happybase :
+
+ * https://happybase.readthedocs.io/en/latest/
+
+
+
 ###Ensuite
 On va executer en python dans l'order étape par étape et dans l'ordre numéroté les 4 fichiers.
 ##TP 2 Python/HappyBase

@@ -67,7 +67,7 @@ for mots in csv_f:
             if not valeur: continue
 
             table.put(id, {'%s:%s'%(famille, colonne) : valeur})
-            #print "put arbres, '%s', '%s:%s', '%s'" % (id, famille, colonne, valeur)
+            print "put arbres, '%s', '%s:%s', '%s'" % (id, famille, colonne, valeur)
 
 
 connection.close()
