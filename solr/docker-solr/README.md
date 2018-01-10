@@ -1,6 +1,9 @@
 # SolR / TP0
+
 La première prise en main de SolR.
+
 ##Les commande serveur de base
+
 Une fois le container docker lancé, on s'y connecte en bash à l'aide de la commande `docker exec -it dockersolr_solr_1 bash`
 
 On se retrouve dans le dossier :
@@ -15,7 +18,9 @@ On va maintenant créer notre collection pour ce TP0 qu'on va nommer demo
 	bin/solr create -c demo
 
 Cette commande a créé la collection demo. On la retrouve dans l'UI qu'on va au poitn suivant.
+
 ##L'interface web de SolR
+
 SolR met à disposition une interface web qui permet d'accèder à de nombreuses informations sur le serveur SolR.
 
 On y accède sur l'url [http://localhost:8983](http://localhost:8983)
@@ -35,10 +40,13 @@ Si on souhaite ajouter plusieurs livres d'un coup, on peut passer plusieurs livr
 A vous maintenant d'ajouter avec l'id "book7", votre livre préféré.
 
 ###C'était quoi déjà le livre book7 ?
+
 On va récupérer les informations sur le book7 spécifiquement. Pour cela, on utilise Postman et on appelle en GET l'url suivante :
 
 	http://localhost:8983/solr/demo/get?id=book7
+
 ##Typologie de champs
+
 Il est important de typer les champs dans SolR afin d'optimiser les méthodes d'indexation et de requètages associé.
 
 Plusieurs méthodes sont utilisables pour spécifier les types de champs d'une collection.
@@ -50,6 +58,7 @@ Les champs dynamique qui adapte leur type à la convention de nommage du champs 
 ![Suffixe SolR](md-img/suffixe_df.png)
 
 ##Update d'un book
+
 On va mettre à jour les informations du book2 avec quelques éléments nouveaux, pour cela, dans postman, on va réutiliser POST dans `http://localhost:8983/solr/demo/update/json` avec en body de type JSON.
 
 	[
@@ -59,11 +68,13 @@ On va mettre à jour les informations du book2 avec quelques éléments nouveaux
 	  "ISBN_s"     : { "add" : " 2-905158-67-0" }
 	 }
 	]
+
 Et on vérifie en faisant un GET 
 
 	http://localhost:8983/solr/demo/get?id=book2
 	
 ##Bientôt la première requète
+
 On va importer quelques livres supplémentaires au format CSV pour notre première requète. Pour cela, toujours Postman en POST mais sur l'URL `http://localhost:8983/solr/demo/update/?jsoncommitWithin=5000` avec le body :
 
 	id,cat_s,pubyear_i,title_t,author_s,series_s,sequence_i,publisher_s
@@ -81,6 +92,7 @@ On va importer quelques livres supplémentaires au format CSV pour notre premiè
 Le paramètre jsoncommitWithin sert à spécifier qu'on souhaite que les datas soient disponibles pour la recherche dans 5 secondes. En effet, l'index n'est pas remis à jour en temps réel sur SolR.
 
 ##La première, elle est là
+
 On va faire une recherche de dingue, on va récupérer le titre et l'auteur des livres qui contiennent le mot couleur. On récupère des données, on fait donc un GET dans postman :
 
 	http://localhost:8983/solr/demo/query?q=title_t:couleur&fl=author_s,title_t
@@ -105,6 +117,7 @@ Voilà les équivalents query <=> json :
 Issue de la doc officielle mais faux, il faut inverser limit et rows
 
 ##C'est pas tout ?
+
 Bien sur que non. On va faire une requète avec un order et un limite. On appelle en post `http://localhost:8983/solr/demo/query` avec le JSON :
 	
 	{
@@ -147,14 +160,19 @@ On retourne dans la interface solR pour constater que tout s'est importé :
 	http://localhost:8983/solr/#/movies
 
 ##Manipulation de données
+
 Dans cet exemple, on utilisera uniquement postman sur l'url de requète du core : `http://localhost:8983/solr/movies/query` en postant du JSON.
+
 ###Récupération d'un film
+
 On va récupérer le film "jurassic world"
 
 	{
 	  "query" : "film:Jurassic"
 	}
+
 ###Récupération d'un film (mode fuzzy)
+
 Voyons voir si on peut retrouver les films qui contiennent le mot welcome mais ortographié par l'académie française : 
 
 	{
@@ -162,22 +180,28 @@ Voyons voir si on peut retrouver les films qui contiennent le mot welcome mais o
 	}
 
 ###Recherche plain text d'un film
+
 	{
 	  "query" : "film:New York"
 	}
+
 ###tous les films noté plus de 4 contenant le mot girl
+
 	{
 	  "query" : "film:girl",
 	  "filter" : "rating:[4 TO *]"
 	}
 
 ###Recherche des 5 films les mieux notés
+
 	{
 	  "query" : "*:*",
 	  "limit" : 5,
 	  "sort" : "rating asc"
 	}
+
 ### recherche des 5 films les mieux notés ayant plus de 50 votes et classés par nombre de voyant décroissant en cas d'égalité
+
 	{
 	  "query" : "*:*",
 	  "filter" : "votes:[50 TO *]"
@@ -186,7 +210,9 @@ Voyons voir si on peut retrouver les films qui contiennent le mot welcome mais o
 	}
 	
 ###Les facets
+
 Les facets permettent de faire des opérations plus complexes dans les recherches proches des aggrégats SQL
+
 ####Moyenne des films de 2014
 	{
 	  "query" : "year:2014",
@@ -194,8 +220,11 @@ Les facets permettent de faire des opérations plus complexes dans les recherche
 	  	"average_rating" : "avg(rating)"
 	  }
 	}
+
 ![Json function](md-img/json_function.png)
+
 ####Le nombre de film par note de plus de 3 sur l'année 2015 
+
 	{
 		"query" : "year:2015",
 		"facet": {
@@ -210,6 +239,7 @@ Les facets permettent de faire des opérations plus complexes dans les recherche
 	}
 
 #### Les nombre de films par année et les 2 années les plus représentés
+
 Pour faire un range sur une chaine de caractère plutôt que sur un nombre, il faut utiliser le facet term. Par exemple :
 	
 	{
@@ -247,17 +277,21 @@ Pour faire un range sur une chaine de caractère plutôt que sur un nombre, il f
 			}
 		}
 	}
+
 ####Pour aller plus loin sur les facets
+
 Un très bon tutoriel et une bonne base sur SolR :
 [http://yonik.com/json-facet-api/](http://yonik.com/json-facet-api/)
 
 
 ##Supression des datas (vidage de l'index)
+
 Il peut être utile parfois de supprimer des données d'un index. Ci après l'exemple de la suppression de toutes les données : `http://localhost:8983/solr/movies/update/json?commit=true`
 
 	{"delete":{"query":"*:*"}}
 
 ##Exercice
+
 Il vous est demandé de créer un core sur le même container que le TP0 et le TP1
 
 * créer le core tweets
