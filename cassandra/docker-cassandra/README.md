@@ -1,7 +1,11 @@
 # Cassandra
+
 La manipulation CSQL de la base de données cassandra.
+
 ##TP0, première manipulation en ligne de commande
+
 ### Lancement de cassandra monoserver
+
 	docker-compose up
 	
 On ira voir ensemble à quoi correspond cette image.
@@ -27,8 +31,6 @@ On va executer une demande de status du serveur
 	service cassandra status
 	
 On remarque que le service est arrété (ce qui n'est pas totallement vrai). Il y a en effet deux méthodes pour lancer Cassandra en service ou stand-alone (ce qui est le cas ici). C'est la commande cassandra qui a été utilisé et qui a lancé en background la commande java qui fait tourner Cassandra.
-
-
 
 Les logs sont accessibles dans `/var/log/cassandra`, la configuration dans `/etc/cassandra` et les datas seront là `/var/lib/cassandra` dans le cadre de l'execution mono serveur qui nous interesse ici.
 
@@ -69,7 +71,7 @@ On accède à notre KEYSPACE
 	
 ####TABLES
 
-ON va créer nos tables songs et playslits, mais comme Cassandra n'est pas un expert des jointures nous allons dénormaliser les données de songs dans playlists : 
+On va créer nos tables songs et playslits, mais comme Cassandra n'est pas un expert des jointures nous allons dénormaliser les données de songs dans playlists : 
 
 	CREATE TABLE songs (
 	  id uuid PRIMARY KEY,
@@ -436,6 +438,155 @@ La cardinalité des autres colonnes ne justifie pas l'ajout d'index. Dans ces ca
 	SELECT * FROM playlists WHERE album = 'Roll Away' AND title = 'Outside Woman Blues' ALLOW FILTERING ;
 
 ##TP2 - Exercice
-https://github.com/Igosuki/workshop-cassandra-cql
 
-http://b3d.bdpedia.fr/cassandra_tp.html
+Ici on va réaliser un exercice honteusement pompé sur internet par un formateur fainéant :
+
+[http://b3d.bdpedia.fr/cassandra_tp.html](http://b3d.bdpedia.fr/cassandra_tp.html)
+
+##TP3 Exercice cassandra 2
+
+On va créer le keyspace ecole
+
+	CREATE KEYSPACE IF NOT EXISTS ecole WITH REPLICATION = 'class' : 'SimpleStrategy', 'replication_factor': 3 ;
+	
+On va ensuite utiliser cette base
+
+	USE ecole;
+	
+On y créé les tables :
+
+	CREATE TABLE Cours (
+		idCours INT, Intitule VARCHAR, Responsable INT, Niveau VARCHAR, nbHeuresMax INT, Coeff INT,
+		PRIMARY KEY ( idCours ) );
+	CREATE INDEX fk_Enseignement_Enseignant_idx ON Cours ( Responsable ) ;
+	
+	CREATE TABLE Enseignant (
+		idEnseignant INT, Nom VARCHAR, Prenom VARCHAR, status VARCHAR,
+		PRIMARY KEY ( idEnseignant ) );
+		
+On check la table
+
+	DESC ecole;
+	
+On y ajoute des données 
+
+	INSERT INTO Cours (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (1,'Introduction aux Bases de Donnees',1,'M1',30,3);
+	INSERT INTO Cours (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (2,'Immeubles de Grandes Hauteurs',4,'M1',30,2);
+	INSERT INTO Cours (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (3,'Production et distribution de biens et de ser',5,'M1',30,2); INSERT INTO Cours (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (4,'Bases de Donnees Avancees',1,'M2',30,5);
+	INSERT INTO Cours (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (5,'Architecture des Systemes Materiel',6,'M2',8,1);
+	INSERT INTO Cours (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (6,'IT Business / Introduction',7,'M2',20,3);
+	INSERT INTO Cours (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (7,'IT Business / Strategie et Management',8,'M2',10,1);
+	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (1,'Travers','Nicolas','Vacataire');
+	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (2,'Mourier','Pascale','Titulaire');
+	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (3,'Boisson','Francois','Vacataire');
+	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (4,'Mathieu','Eric','Titulaire');
+	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (5,'Chu','Chengbin','Titulaire');
+	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (6,'Boutin','Philippe','Titulaire');
+	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (7,'Escribe','Julien','Vacataire');
+	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (8,'Znaty','David','Vacataire');
+	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (9,'Abal-Kassim','Cheik Ahamed','Vacataire');
+	
+###A vous de jouer pour les requètes simples :
+
+1. Liste tous les cours ;
+2. Liste des intitulés de cours ;
+3. Nom de l’enseignant n°4 ;
+4. Intitulé des cours du responsable n° 
+5. Intitulé des cours dont le nombre d’heures maximum est égal à 30 ;
+6. Intitulé des cours dont le responsable ’1’ et dont le niveau est ’M1’ ; Utiliser `ALLOW FILTERING`.
+7. Intitulé des cours dont les responsables ont une valeur inférieure à 5 ;
+8. Intitulé des cours dont l’identifiant est inférieure à 5 ; Utiliser la fonction `token()`.
+9. Compter le nombre de lignes retournées par la requête précédente : Utiliser `COUNT(*)`
+
+###Et toujours à vous de jouer pour les requètes un peu plus complexe
+
+1. La requête ci-après ne fonctionne pas, trouver une solution pour la faire fonctionner ; `select nom, prenom from enseignant where status='Vacataire';`
+2. Créer un deuxième index sur cours.niveau. Exécutez de nouveau la requête 6. des questions précédentes. Regarder la trace générée par la requête (DevCenter : onglet ’Query Trace’ à côté des résultats - Console : `TRACING ON`, avant la requête). Quel index a-t-il été utilisé pour cette requête ?
+3. Donner les intitulés des cours dont le statut du responsable est ’Vacataire’ ;
+4. La jointure n’est pas possible avec CQL (à cause du stockage par hachage distribué). Nous allons créer une solution alternative en fusionnant les deux tables. Pour cela, il va nous allons choisir d’intégrer la table ’Enseignant’ dans la table ’Cours’, nous appellerons cette table ’coursEnseignant’. Trois possibilités sont disponibles pour ce faire : SET, LIST, MAP, SubType. Choisissez la solution qui permettra de faire un filtrage sur le statut de l’enseignant.
+
+Il faut maintenant créer la table CoursEnseignat prète à être nourri par les requètes suivantes :
+
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
+	(1,'Introduction aux Bases de Donnees',{'idenseignant':'1','nom':'Travers','prenom':'Nicolas','status':'Vacataire'},'M1',30,3);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
+	(2,'Immeubles de Grandes Hauteurs',{'idenseignant':'4','nom':'Mathieu','prenom':'Eric','status':'Titulaire'},'M1',30,2);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
+	(3,'Production et distribution de biens et de ser',{'idenseignant':'5','nom':'Chu','prenom':'Chengbin','status':'Titulaire'},'M1',30,2);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
+	(4,'Bases de Donnees Avancees',{'idenseignant':'1','nom':'Travers','prenom':'Nicolas','status':'Vacataire'},'M2',30,5);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
+	(5,'Architecture des Systemes Materiel',{'idenseignant':'6','nom':'Boutin','prenom':'Philippe','status':'Titulaire'},'M2',8,1);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
+	(6,'IT Business / Introduction',{'idenseignant':'7','nom':'Escribe','prenom':'Julien','status':'Vacataire'},'M2',20,3);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
+	(7,'IT Business / Strategie et Management',{'idenseignant':'8','nom':'Znaty','prenom':'David','status':'Vacataire'},'M2',10,1);
+
+###Encore des reqètes complexes
+	
+1. Créer un index sur le Niveau de la table CoursEnseignant ;
+2. Donner les noms des responsables des cours (table CoursEnseignant) de niveau ’M1’ ;
+3. Donner l’intitulé des cours dont le responsable est vacataire ;
+4. Nous allons inverser la fusion des tables en créant une table ’EnseignantCours’ avec un sous-type ’Cours’. Pour pouvoir rajouter un ensemble de valeurs pour les cours d’un responsable, on peut utiliser : set, map ou list. Nous utiliserons le type map. Créer le type ’Cours’ et la table ’EnseignantCours’
+
+Insérer les données suivantes
+
+	INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (1,'Travers','Nicolas','Vacataire', {1:{idcours:1,intitule:'Introduction aux Bases de Donnees',niveau:'M1',nbHeuresMax:30,Coeff:3}, 4:{idcours:4,intitule:'Bases de Donnees Avancees',niveau:'M2',nbHeuresMax:30,coeff:5}});
+	INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (2,'Mourier','Pascale','Titulaire', {}); INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (3,'Boisson','Francois','Vacataire', {}); INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (4,'Mathieu','Eric','Titulaire',
+	{4:{idcours:2,intitule:'Immeubles de Grandes Hauteurs',niveau:'M1',nbHeuresMax:30,coeff:2}});
+	INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (5,'Chu','Chengbin','Titulaire', {}); INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (6,'Boutin','Philippe','Titulaire',
+	{5:{idcours:5,intitule:'Architecture des Systemes Materiel',niveau:'M2',nbHeuresMax:8,coeff:1}});
+	INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (7,'Escribe','Julien','Vacataire',
+	{6:{idcours:6,intitule:'IT Business / Introduction',niveau:'M2',nbHeuresMax:20,coeff:3}});
+	INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (8,'Znaty','David','Vacataire',
+	{7:{idcours:7,intitule:'IT Business / Strategie et Management',niveau:'M2',nbHeuresMax:10,coeff:1}});
+	INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (9,'Abal-Kassim','Cheik Ahamed','Vacataire', {});
+	
+###Les dernières pour la route
+	
+1. Créer un index sur le status de la table EnseignantCours ;
+2. Donner les intitulés des cours dont le responsable est Vacataire ;
+
+###Du map/reduce dans Cassandra
+
+On va créer deux fonctions dans Cassandra. Pour cela la configuration du serveur Cassandra devra nous autoriser à faire les fonctions propre à l'utilisateur.
+
+Pour cela on va éditer le fichier `/etc/cassandra/default.conf/cassandra.yaml`
+
+Dans ce fichier, on cherche la valeure `user_define` et on passe la valeur de la conf à `true`
+
+On créé la fonction Map :
+
+	CREATE OR REPLACE FUNCTION avgState ( state tuple<int,bigint>, val int ) CALLED ON NULL INPUT RETURNS tuple<int,bigint> LANGUAGE java
+	AS 'if (val !=null) { 
+		state.setInt(0, state.getInt(0)+1);
+		state.setLong(1, state.getLong(1)+val.intValue()); 
+	}
+	return state;';
+	
+On créé la fonction result :
+
+	CREATE OR REPLACE FUNCTION avgFinal ( state tuple<int,bigint> ) CALLED ON NULL INPUT RETURNS double LANGUAGE java
+		AS 'double r = 0;
+		if (state.getInt(0) == 0) return null; r = state.getLong(1);
+		r/= state.getInt(0);
+		return Double.valueOf(r);';
+
+On créé la fonction d'aggregat qui va utiliser nos fonctions précedemment renseigner :
+
+	CREATE AGGREGATE IF NOT EXISTS average ( int ) 
+		SFUNC avgState STYPE tuple<int,bigint> 
+		FINALFUNC avgFinal INITCOND (0,0);
+
+####Utilisation de nos fonctions Map/reduce
+
+1. Calculer la moyenne des ’nbHeuresMax’ pour la table ’coursEnseignant’
+2. La même mais pour des responsables ’Vacataire’
+
+###Bonus
+
+Créer une fonction Map/Reduce pour faire l’équivalent d’un ”GROUP BY + COUNT” sur du texte pour la requête suivante :
+
+	SELECT countGroup(niveau) from CoursEnseignant;’
+
+Le paramètre du ’state’ doit être un ’map<text, int>.

@@ -27,3 +27,4 @@ Temporary Items
 .apdisk
 hbase/docker-hbase/happybaseDocker/python/premierExemple/3_readTable_b.py
 hbase/data_source/les-arbres.csv
+cassandra/share/restaurants/

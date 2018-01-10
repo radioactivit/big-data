@@ -1,0 +1,15 @@
+version: '2'
+services:
+  cassandra-1:
+    image: cassandra
+    expose: [8080, 8888, 57311, 57312, 7000, 9160, 700, 9042]
+  cassandra-2:
+    image: cassandra
+    expose: [8080, 8888, 57311, 57312, 7000, 9160, 700, 9042]
+  cassandra-3:
+    image: cassandra
+    expose: [8080, 8888, 57311, 57312, 7000, 9160, 700, 9042]
+  nginx:
+    image: nginx
+    ports: 
+      - 80:80
