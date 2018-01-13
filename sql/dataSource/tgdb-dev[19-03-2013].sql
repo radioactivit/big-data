@@ -15,6 +15,8 @@ Date: 2013-03-19 23:05:15
 
 SET FOREIGN_KEY_CHECKS=0;
 
+USE jeuxvideos;
+
 -- ----------------------------
 -- Table structure for `apiusers`
 -- ----------------------------
