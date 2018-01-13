@@ -2,7 +2,7 @@
 
 La manipulation CSQL de la base de données cassandra.
 
-##TP0, première manipulation en ligne de commande
+## TP0, première manipulation en ligne de commande
 
 ### Lancement de cassandra monoserver
 
@@ -18,7 +18,7 @@ On ira voir ensemble à quoi correspond cette image.
 	
 ### Manipulation du serveur
 
-###les commandes du serveur
+### les commandes du serveur
 
 Pour manipuler le serveur cassandra, nous pouvons utiliser le gestionnaire de service de la distribution linux
 
@@ -51,7 +51,7 @@ La commande `HELP` est disponible dans cqlsh pour accèder à une documentation 
 
 On est maintenant prèt à éxecuter nos premières commandes CassandraSQL.
 
-####Keyspace
+#### Keyspace
 
 Le keyspace est ce qui pourrait se rapprocher d'une DATABASE en SQL, les commandes de manipulation en sont d'ailleurs inspirées.
 
@@ -69,7 +69,7 @@ On accède à notre KEYSPACE
 	
 	USE music;
 	
-####TABLES
+#### TABLES
 
 On va créer nos tables songs et playslits, mais comme Cassandra n'est pas un expert des jointures nous allons dénormaliser les données de songs dans playlists : 
 
@@ -94,7 +94,7 @@ On va créer nos tables songs et playslits, mais comme Cassandra n'est pas un ex
 
 On utilise DESCRIBE pour constater la création des tables dans le KEYSPACE.
 
-####Inserer des datas
+#### Inserer des datas
 
 On va insérer des valeurs dans la table playlists, pour ce faire, on est très proche du SQL :
 
@@ -131,7 +131,7 @@ L'autre solution si l'on cherche régulière l'artist d'une chanson est d'indexe
 	
 Pour aller plus loin : [https://www.datastax.com/dev/blog/allow-filtering-explained-2](https://www.datastax.com/dev/blog/allow-filtering-explained-2)
 
-##TP0.5 Les collection
+## TP0.5 Les collection
 
 A l'issue de la journée d'hier, nous avons lancé CASSANDRA, et manipuler les tables.
 
@@ -142,7 +142,7 @@ On va créer un KEYSPACE de test pour jouer avec les collections :
 	CREATE KEYSPACE testdivers WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
 	USE testdivers;
 
-###les Sets
+### les Sets
 
 Un set est un groupe d'element qui est retrourné dans l'ordre d'insertion au moment de la requête. On va l'illustrer avec un stockage d'email multiple
 
@@ -183,7 +183,7 @@ On vérifie :
 
 	SELECT user_id, emails FROM users WHERE user_id = 'frodo';
 
-###Les listes
+### Les listes
 
 Les listes sont des groupes d'element dont l'ordre importe, elles permettent de manipuler les éléments comme un tableau.
 
@@ -247,7 +247,7 @@ On vérifie :
 
 	SELECT user_id, top_places FROM users WHERE user_id = 'frodo';
 
-###les maps
+### les maps
 
 Les maps sont des couples clef/valeur qui se rapprochent du fonctionnement des tableaux associatifs.
 
@@ -307,9 +307,9 @@ On vérifie et on revérifie 30 secondes plus tard :
 	SELECT user_id, todo FROM users WHERE user_id = 'frodo';
 
 
-##TP1 La suite de la musique
+## TP1 La suite de la musique
 
-###Création des collections
+### Création des collections
 
 On retourne dans le Keyspace music
 
@@ -351,7 +351,7 @@ On vérifie :
 
 	SELECT * FROM playlists;
 	
-###Indexer une collection
+### Indexer une collection
 
 On a vue qu'il est difficile pour Cassandra de faire des requêtes sur ses données, heureusement dans les dernières version de Cassandra, il est possible d'indexer des collections.
 
@@ -381,7 +381,7 @@ On vérifie la création de l'index avec :
 
 	DESCRIBE playlists;
 
-###Chercher dans une collection
+### Chercher dans une collection
 
 Avant de chercher dans les collections, voyons ce que nous avons dans les tags :
 
@@ -403,7 +403,7 @@ Et si on cherche sur une clef de la map :
 	
 Une collection n'est pas faites pour supporte de grandes quantités de data, la limitation est de 64K, néanmoins c'est une ressource indispensable pour la dénormalisation.
 
-###Les indexs
+### Les indexs
 
 Un index est une manière d'accèder à des attributs dans Cassandra différente de la clef de partitionnement de la table. Les index produisent des tables invisibles contenant les valeurs indexées.
 
@@ -437,17 +437,21 @@ La cardinalité des autres colonnes ne justifie pas l'ajout d'index. Dans ces ca
 
 	SELECT * FROM playlists WHERE album = 'Roll Away' AND title = 'Outside Woman Blues' ALLOW FILTERING ;
 
-##TP2 - Exercice
+## TP2 - Exercice
 
 Ici on va réaliser un exercice honteusement pompé sur internet par un formateur fainéant :
 
 [http://b3d.bdpedia.fr/cassandra_tp.html](http://b3d.bdpedia.fr/cassandra_tp.html)
 
-##TP3 Exercice cassandra 2
+## TP3 De l'admin système, comment on installe un cluster Cassandra
+
+Rendez-vous dans le repertoire `docker-cassandra-cluster` pour ce TP
+
+## TP4 Exercice cassandra 2
 
 On va créer le keyspace ecole
 
-	CREATE KEYSPACE IF NOT EXISTS ecole WITH REPLICATION = 'class' : 'SimpleStrategy', 'replication_factor': 3 ;
+	CREATE KEYSPACE IF NOT EXISTS ecole WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 3 };
 	
 On va ensuite utiliser cette base
 
@@ -486,43 +490,37 @@ On y ajoute des données
 	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (8,'Znaty','David','Vacataire');
 	INSERT INTO Enseignant (idEnseignant,Nom,Prenom,status) VALUES (9,'Abal-Kassim','Cheik Ahamed','Vacataire');
 	
-###A vous de jouer pour les requètes simples :
+### A vous de jouer pour les requètes simples :
 
 1. Liste tous les cours ;
 2. Liste des intitulés de cours ;
 3. Nom de l’enseignant n°4 ;
-4. Intitulé des cours du responsable n° 
+4. Intitulé des cours du responsable n°1
 5. Intitulé des cours dont le nombre d’heures maximum est égal à 30 ;
 6. Intitulé des cours dont le responsable ’1’ et dont le niveau est ’M1’ ; Utiliser `ALLOW FILTERING`.
 7. Intitulé des cours dont les responsables ont une valeur inférieure à 5 ;
-8. Intitulé des cours dont l’identifiant est inférieure à 5 ; Utiliser la fonction `token()`.
+8. Intitulé des cours dont l’identifiant est inférieure à 5 ; Utiliser `IN` ou la fonction `token()`. `https://docs.datastax.com/en/cql/3.3/cql/cql_using/useToken.html`
 9. Compter le nombre de lignes retournées par la requête précédente : Utiliser `COUNT(*)`
 
-###Et toujours à vous de jouer pour les requètes un peu plus complexe
+### Et toujours à vous de jouer pour les requètes un peu plus complexe
 
 1. La requête ci-après ne fonctionne pas, trouver une solution pour la faire fonctionner ; `select nom, prenom from enseignant where status='Vacataire';`
-2. Créer un deuxième index sur cours.niveau. Exécutez de nouveau la requête 6. des questions précédentes. Regarder la trace générée par la requête (DevCenter : onglet ’Query Trace’ à côté des résultats - Console : `TRACING ON`, avant la requête). Quel index a-t-il été utilisé pour cette requête ?
-3. Donner les intitulés des cours dont le statut du responsable est ’Vacataire’ ;
-4. La jointure n’est pas possible avec CQL (à cause du stockage par hachage distribué). Nous allons créer une solution alternative en fusionnant les deux tables. Pour cela, il va nous allons choisir d’intégrer la table ’Enseignant’ dans la table ’Cours’, nous appellerons cette table ’coursEnseignant’. Trois possibilités sont disponibles pour ce faire : SET, LIST, MAP, SubType. Choisissez la solution qui permettra de faire un filtrage sur le statut de l’enseignant.
+2. Réexecuter les requète de la première partie après avoir executer `TRACING ON` (`TRACING OFF` pour areter le tracing)
+3. Créer un deuxième index sur cours.niveau. Exécutez de nouveau la requête 6. des questions précédentes. En traçant son exécution indiquer quel index a-t-il été utilisé pour cette requête ?
+4. Donner les intitulés des cours dont le statut du responsable est ’Vacataire’ ;
+5. La jointure n’est pas possible avec CQL (à cause du stockage par hachage distribué). Nous allons créer une solution alternative en fusionnant les deux tables. Pour cela, il va nous allons choisir d’intégrer la table ’Enseignant’ dans la table ’Cours’, nous appellerons cette table ’coursEnseignant’. Trois possibilités sont disponibles pour ce faire : SET, LIST, MAP, SubType. Choisissez la solution qui permettra de faire un filtrage sur le statut de l’enseignant.
 
-Il faut maintenant créer la table CoursEnseignat prète à être nourri par les requètes suivantes :
+Il faut maintenant créer la table CoursEnseignant prète à être nourrie par les requètes suivantes :
 
-	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
-	(1,'Introduction aux Bases de Donnees',{'idenseignant':'1','nom':'Travers','prenom':'Nicolas','status':'Vacataire'},'M1',30,3);
-	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
-	(2,'Immeubles de Grandes Hauteurs',{'idenseignant':'4','nom':'Mathieu','prenom':'Eric','status':'Titulaire'},'M1',30,2);
-	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
-	(3,'Production et distribution de biens et de ser',{'idenseignant':'5','nom':'Chu','prenom':'Chengbin','status':'Titulaire'},'M1',30,2);
-	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
-	(4,'Bases de Donnees Avancees',{'idenseignant':'1','nom':'Travers','prenom':'Nicolas','status':'Vacataire'},'M2',30,5);
-	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
-	(5,'Architecture des Systemes Materiel',{'idenseignant':'6','nom':'Boutin','prenom':'Philippe','status':'Titulaire'},'M2',8,1);
-	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
-	(6,'IT Business / Introduction',{'idenseignant':'7','nom':'Escribe','prenom':'Julien','status':'Vacataire'},'M2',20,3);
-	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES
-	(7,'IT Business / Strategie et Management',{'idenseignant':'8','nom':'Znaty','prenom':'David','status':'Vacataire'},'M2',10,1);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (1,'Introduction aux Bases de Donnees',{'idenseignant':'1','nom':'Travers','prenom':'Nicolas','status':'Vacataire'},'M1',30,3);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (2,'Immeubles de Grandes Hauteurs',{'idenseignant':'4','nom':'Mathieu','prenom':'Eric','status':'Titulaire'},'M1',30,2);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (3,'Production et distribution de biens et de ser',{'idenseignant':'5','nom':'Chu','prenom':'Chengbin','status':'Titulaire'},'M1',30,2);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (4,'Bases de Donnees Avancees',{'idenseignant':'1','nom':'Travers','prenom':'Nicolas','status':'Vacataire'},'M2',30,5);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (5,'Architecture des Systemes Materiel',{'idenseignant':'6','nom':'Boutin','prenom':'Philippe','status':'Titulaire'},'M2',8,1);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (6,'IT Business / Introduction',{'idenseignant':'7','nom':'Escribe','prenom':'Julien','status':'Vacataire'},'M2',20,3);
+	INSERT INTO CoursEnseignant (idCours,Intitule,Responsable,Niveau,nbHeuresMax,Coeff) VALUES (7,'IT Business / Strategie et Management',{'idenseignant':'8','nom':'Znaty','prenom':'David','status':'Vacataire'},'M2',10,1);
 
-###Encore des reqètes complexes
+### Encore des reqètes complexes
 	
 1. Créer un index sur le Niveau de la table CoursEnseignant ;
 2. Donner les noms des responsables des cours (table CoursEnseignant) de niveau ’M1’ ;
@@ -542,18 +540,82 @@ Insérer les données suivantes
 	{7:{idcours:7,intitule:'IT Business / Strategie et Management',niveau:'M2',nbHeuresMax:10,coeff:1}});
 	INSERT INTO EnseignantCours (idEnseignant,Nom,Prenom,status,cours) VALUES (9,'Abal-Kassim','Cheik Ahamed','Vacataire', {});
 	
-###Les dernières pour la route
+### Les dernières pour la route
 	
 1. Créer un index sur le status de la table EnseignantCours ;
 2. Donner les intitulés des cours dont le responsable est Vacataire ;
 
-###Du map/reduce dans Cassandra
+## TP 4.5 - les fonctions spécifiques dans Cassandra (UDF => User Defined Functions).
+
+On peut créer ses propres fonctions et aggrégats dans Cassandra. 
+
+POur ce faire, il faut autoriser la creation de ces fonctions dans la configuration de Cassandra et pour cela on va éditer le fichier `cassandra.yaml`
+
+Dans ce fichier, on cherche la valeure `user_define` et on passe la valeur de la conf à `true` et relancer Cassandra
+
+### Les fonctions simples
+
+Pour créer une DUF dans Cassandra, on utilise le la commande `CREATE FUNCTION`
+
+Par exemple pour créer la fonction my_sin qui va donner le sinus d'un double passer en paramètre :
+
+	CREATE OR REPLACE FUNCTION my_sin ( input double ) CALLED ON NULL INPUT RETURNS double LANGUAGE java AS 'return input == null? null: Double.valueOf( Math.sin( input.doubleValue() ) );';
+	
+Pour caster un int en double par exemple :
+
+	CREATE OR REPLACE FUNCTION int_to_double ( input int ) CALLED ON NULL INPUT RETURNS double LANGUAGE java AS 'return input == null? null: Double.valueOf( input );';
+
+Cela va permettre d'utiliser la fonction my_sin sur des entiers en 2 temps. Sur un exemple précédent (non cohérent bien entendu) :
+
+	SELECT my_sin(int_to_double(nbheuresmax)) FROM coursenseignant;
+
+### Les fonctions sur SET
+
+Ces DUFs vont aussi pouvoir prendre en paramètre des sets et en rendre des entiers calculés.
+
+Pour les tests suivants on va utilisé un nouveau keyspace duf : 
+
+	CREATE KEYSPACE IF NOT EXISTS duf WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 3 };
+	USE duf;
+
+On va créer les DUFs suivantes :
+
+	CREATE OR REPLACE FUNCTION setTotal(input set<int>) RETURNS NULL ON NULL INPUT RETURNS int LANGUAGE java AS '    
+	               int total = 0;
+	               for (Object i : input) { total += (Integer) i; }
+	               return total;
+	            ';
+	CREATE OR REPLACE FUNCTION setMax(input set<int>) RETURNS NULL ON NULL INPUT RETURNS int LANGUAGE java AS '    
+                int max = Integer.MIN_VALUE;
+                for (Object i : input) { max = Math.max(max, (Integer) i); }
+                return max;
+            ';
+    CREATE OR REPLACE FUNCTION setMin(input set<int>) RETURNS NULL ON NULL INPUT RETURNS int LANGUAGE java AS '
+                int min = Integer.MAX_VALUE;
+                for (Object i : input) { min = Math.min(min, (Integer) i); }
+                return min;
+            ';
+            
+Pour les tester et es comprendre on va créer la table :
+
+	CREATE TABLE games ( name text, 
+	                     when date, 
+	                     scores set<int>, 
+	                     primary KEY (name));
+
+On insert des données de test :
+
+	INSERT INTO games (name , when, scores ) VALUES ( 'SuperGame', '2015-05-03', {1,2,65,32,981,91 });
+	
+Et on regarde le résultat :
+
+	select setTotal(scores) as total, setMin(scores) as min, setMax(scores) as max from games where name = 'SuperGame';
+
+Si vous avez compris, à vous d'ajouter maintenant plus de fonctions de manipulations des datas en créant la fonction setAverage qui donnera la moyenne des scores.
+
+### Du map/reduce d'entrée de gamme dans Cassandra
 
 On va créer deux fonctions dans Cassandra. Pour cela la configuration du serveur Cassandra devra nous autoriser à faire les fonctions propre à l'utilisateur.
-
-Pour cela on va éditer le fichier `/etc/cassandra/default.conf/cassandra.yaml`
-
-Dans ce fichier, on cherche la valeure `user_define` et on passe la valeur de la conf à `true`
 
 On créé la fonction Map :
 
@@ -572,21 +634,90 @@ On créé la fonction result :
 		r/= state.getInt(0);
 		return Double.valueOf(r);';
 
-On créé la fonction d'aggregat qui va utiliser nos fonctions précedemment renseigner :
+On créé à présent la fonction d'aggregat qui va utiliser nos fonctions précedentes SFUNC pour le map STYPE pour le retour du map qui sera transmis à la fonction final de reduce et à chaque nouvel appel de la fonction map et FINALFUNC pour le reduce :
 
-	CREATE AGGREGATE IF NOT EXISTS average ( int ) 
-		SFUNC avgState STYPE tuple<int,bigint> 
-		FINALFUNC avgFinal INITCOND (0,0);
+	CREATE AGGREGATE IF NOT EXISTS average ( int ) SFUNC avgState STYPE tuple<int,bigint> FINALFUNC avgFinal INITCOND (0,0);
 
-####Utilisation de nos fonctions Map/reduce
+#### Utilisation de nos fonctions Map/reduce
 
 1. Calculer la moyenne des ’nbHeuresMax’ pour la table ’coursEnseignant’
 2. La même mais pour des responsables ’Vacataire’
 
-###Bonus
+### Bonus ?? a laisser ou pas ? Assez complexe.
 
-Créer une fonction Map/Reduce pour faire l’équivalent d’un ”GROUP BY + COUNT” sur du texte pour la requête suivante :
+Créer une fonction d'aggrégat pour faire l’équivalent d’un ”GROUP BY + COUNT” sur du texte pour la requête suivante :
 
-	SELECT countGroup(niveau) from CoursEnseignant;’
+	SELECT countGroup(niveau) from CoursEnseignant;
 
-Le paramètre du ’state’ doit être un ’map<text, int>.
+Le paramètre du `state` doit être un `map<text, int>`.
+
+## TP5 : les vues matérialisées dans Cassandra
+
+Cassandra comme PostgreSQL, possède une fonction de vue matérialisée. Cette fonction va permettre de créer des tables précalculés et maintenu à jour à partir d'une table source.
+
+On va créer notre Keyspace vue :
+
+	CREATE KEYSPACE IF NOT EXISTS vue WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 3 };
+	USE vue;
+	
+Dans ce KEYSPACE, nous allons créer la table `scores`.
+
+	CREATE TABLE scores
+	(
+	  user TEXT,
+	  game TEXT,
+	  year INT,
+	  month INT,
+	  day INT,
+	  score INT,
+	  PRIMARY KEY (user, game, year, month, day)
+	);
+	
+Puis nous allons créer des vues métrialisées autours de cette table source :
+
+	CREATE MATERIALIZED VIEW alltimehigh AS
+       SELECT user FROM scores
+       WHERE game IS NOT NULL AND score IS NOT NULL AND user IS NOT NULL AND year IS NOT NULL AND month IS NOT NULL AND day IS NOT NULL
+       PRIMARY KEY (game, score, user, year, month, day)
+       WITH CLUSTERING ORDER BY (score desc);
+
+	CREATE MATERIALIZED VIEW dailyhigh AS
+       SELECT user FROM scores
+       WHERE game IS NOT NULL AND year IS NOT NULL AND month IS NOT NULL AND day IS NOT NULL AND score IS NOT NULL AND user IS NOT NULL
+       PRIMARY KEY ((game, year, month, day), score, user)
+       WITH CLUSTERING ORDER BY (score DESC);
+
+	CREATE MATERIALIZED VIEW monthlyhigh AS
+       SELECT user FROM scores
+       WHERE game IS NOT NULL AND year IS NOT NULL AND month IS NOT NULL AND score IS NOT NULL AND user IS NOT NULL AND day IS NOT NULL
+       PRIMARY KEY ((game, year, month), score, user, day)
+       WITH CLUSTERING ORDER BY (score DESC);
+
+On ajoute maintenant des données de tests dans notre table score :
+
+	INSERT INTO scores (user, game, year, month, day, score) VALUES ('pcmanus', 'Coup', 2015, 05, 01, 4000);
+	INSERT INTO scores (user, game, year, month, day, score) VALUES ('jbellis', 'Coup', 2015, 05, 03, 1750);
+	INSERT INTO scores (user, game, year, month, day, score) VALUES ('yukim', 'Coup', 2015, 05, 03, 2250);
+	INSERT INTO scores (user, game, year, month, day, score) VALUES ('tjake', 'Coup', 2015, 05, 03, 500);
+	INSERT INTO scores (user, game, year, month, day, score) VALUES ('jmckenzie', 'Coup', 2015, 06, 01, 2000);
+	INSERT INTO scores (user, game, year, month, day, score) VALUES ('iamaleksey', 'Coup', 2015, 06, 01, 2500);
+	INSERT INTO scores (user, game, year, month, day, score) VALUES ('tjake', 'Coup', 2015, 06, 02, 1000);
+	INSERT INTO scores (user, game, year, month, day, score) VALUES ('pcmanus', 'Coup', 2015, 06, 02, 2000);
+
+Les vues ont été mises à jour conjointement à la table source et on peut requèter directement les datas dans les vues en bénéficiant de l'ordre et des index. Les resultats requètes suivantes vont différer entre la table source et les vues : 
+
+	SELECT user, score FROM alltimehigh WHERE game = 'Coup' LIMIT 1;
+	
+	SELECT user, score FROM dailyhigh WHERE game = 'Coup' AND year = 2015 AND month = 06 AND day = 01 LIMIT 1;
+	
+	SELECT user, score FROM alltimehigh WHERE game = 'Coup';
+	
+Si on supprime un élément dans la table source, les vues vont être modifiées.
+
+	DELETE FROM scores WHERE user = 'tjake'
+	
+On le constate en appelant à nouveau :
+
+	SELECT user, score FROM alltimehigh WHERE game = 'Coup';
+	
+Les vues sont très récentes dans Cassandra et vont certainement évoluer dans les versions à venir mais leur utilité à date reste limité. Elles ne supportent pas les fonctions, les clauses where, etc...

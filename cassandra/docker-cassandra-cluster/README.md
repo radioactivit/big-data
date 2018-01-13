@@ -164,4 +164,71 @@ On va purger les caches de confs de cassandra
 
 Et finalement on va redémarrer Cassandra et constater que le cluster a changer de nom avec 
 
+	cqlsh
+##A votre tour sur le noeud 2
+
+A vous de refaire la même config sur le noeud 2
+
+##Maintenant, faisons en sorte que ces deux noeuds rejoignent le même cluster.
+
+Ca va se jouer dans le fichier de conf `/etc/cassandra/cassandra.yaml`, on va éditer dans ce fichier de configuration de Cassandra des variables plus en rapport avec le cluster :
+
+* cluster_name : qu'on a déjà renseigné des deux cotés avec le nom de notre cluster
+* seeds : les adresses des noeuds composant notre cluster
+* listen_adress : l'adresse sur lequel écoute notre Cassandra (localhost par défaut)
+* endpoint_snitch : pour préciser au cluster la particularité de son montage (1 ou n datacenter), on va rester dans notre exemple sur un cas simple mono data center
+* auto_bootstrap : indique aux nouveaux noeuds qui rejoingnent le cluster si ils doivent ou non synchroniser automatiquement leur data
+
+On va à présent éditer le fichier :
+
+	nano /etc/cassandra/cassandra.yaml
+	
+Pour s'aider dans nos configs on va installer quelques utilitaires 
+
+	apt-get install iputils-ping net-tools
+	
+On retrouvera `ping`et `ifconfig` qui nous permettrons de contrôler les ips et les interfaces réseaux des membres du cluster.
+	
+On modifie les configurations comme ci-après sur les deux serveurs
+
+	. . .
+	cluster_name: 'CassandraDOCluster'
+	. . .
+	seed_provider:
+	  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+	    parameters:
+	         - seeds: "dockercassandracluster_cassandra-1_1,dockercassandracluster_cassandra-2_1"
+	. . .
+	# listen_address: 127.0.0.1
+	. . .
+	listen_interface: eth0
+	. . .
+	rpc_address: your_server_ip
+	. . .
+	endpoint_snitch: GossipingPropertyFileSnitch
+	. . .
+	auto_bootstrap: false
+
+On arrète et on relance les deux cassandra sur les deux serveurs.
+
+On vérfie que le cluster est monté avec
+
 	nodetool status
+	
+Ce dernier doit à présent montrer le 2 noeuds comme ceci
+
+	Datacenter: datacenter1
+	=======================
+	Status=Up/Down
+	|/ State=Normal/Leaving/Joining/Moving
+	--  Address     Load       Tokens       Owns (effective)  Host ID                               Rack
+	UN  172.20.0.4  219.36 KiB  256          100.0%            ae011865-f62c-42d1-bae6-b201429a6c55  rack1
+	UN  172.20.0.3  195.04 KiB  256          100.0%            6f8b7ecf-94aa-4993-8dfe-1e289a9eb296  rack1
+
+##Serez-vous capable d'ajouter un troisième noeud à ce cluster
+
+Si vous avez de l'avance, essayez d'ajouter seul le troisième noeud au cluster.
+
+##Manipulation
+
+On peut reprendre le TP0 en faisant des manipulations une fois sur un noeud, une fois sur lautre noeud et constaté l'accès transparent aux données.
