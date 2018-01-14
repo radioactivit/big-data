@@ -1,0 +1,28 @@
+version: '2'
+services:
+  mongo-router-a:
+    build: .
+    expose: [27017,27018,27019]
+    
+  mongo-router-b:
+    build: .
+    expose: [27017,27018,27019]
+  mongo-config:
+    build: .
+    expose: [27017,27018,27019]
+  mongo-shard-rs1-a:
+    build: .
+    expose: [27017,27018,27019]
+  mongo-shard-rs1-b:
+    build: .
+    expose: [27017,27018,27019]
+  mongo-shard-rs2-a:
+    build: .
+    expose: [27017,27018,27019]
+  mongo-shard-rs2-b:
+    build: .
+    expose: [27017,27018,27019]
+  nginx:
+    image: nginx
+    ports: 
+      - 80:80

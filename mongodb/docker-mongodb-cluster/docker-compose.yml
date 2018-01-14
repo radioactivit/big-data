@@ -1,0 +1,18 @@
+version: '2'
+services:
+  mongo-primary:
+    build: .
+    expose: [27017,27018,27019]
+  mongo-arbitre:
+    build: .
+    expose: [27017,27018,27019]
+  mongo-secondary-a:
+    build: .
+    expose: [27017,27018,27019]
+  mongo-secondary-b:
+    build: .
+    expose: [27017,27018,27019]
+  nginx:
+    image: nginx
+    ports: 
+      - 80:80
