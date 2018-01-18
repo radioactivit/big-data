@@ -44,6 +44,22 @@ D'autres requètes
 	SELECT * FROM sakila.film ORDER BY release_year DESC LIMIT 10;
 	SELECT release_year, COUNT(film_id) FROM sakila.film GROUP BY release_year;
 
+Manipulation date
+	
+Suite des aggregats
+
+group_concat, avg
+
+La suite avec des sous requètes
+
+La suite avec des jointures
+
+La suite avec des vues
+
+La suite avec des triggers
+
+La suite avec des procédures stockés
+
 ## TP1 - Manipulation manuelle, on remplira la doc au fur et à mesure des manipulations
 
 ### Création d'une BDD
@@ -127,7 +143,7 @@ etc...
 3. faire un select de l'article d'id 5
 4. Trouver tous les articles de l'autreur dont le mail est "j.prevert@email.com"
 5. Trouver tous les articles de la catégorie Amour
-6. Ajouter vous dans la table auteur
+6. Ajoutez-vous dans la table auteur
 7. Ajouter un nouvel article dans la base de données pour l'auteur que vous venez de créer
 8. Trouver tous les articles sans categories
 9. Ajouter une categorie à ses articles

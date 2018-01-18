@@ -1,6 +1,6 @@
-#Installer un cluster Cassandra
+# Installer un cluster Cassandra
 
-##Installer Cassandra sur une distrib fraîche
+## Installer Cassandra sur une distrib fraîche
 
 On va partir de la dernière distribution Ubuntu.
 
@@ -56,7 +56,7 @@ On devrait avoir un résultat de ce genre
 	--  Address    Load       Tokens       Owns (effective)  Host ID                               Rack
 	UN  127.0.0.1  129.45 KiB  256          100.0%            6f8b7ecf-94aa-4993-8dfe-1e289a9eb296  rack1
 	
-##Configurer Cassandra sur une distrib fraîche
+## Configurer Cassandra sur une distrib fraîche
 
 Pour éviter de mauvaises manipulations, on va sauvegarder notre configuration fonctionnelle
 
@@ -105,7 +105,7 @@ Enfin, on va créer les permissions pour notre nouvel utilisateur
 
 	superuser@cqlsh> GRANT ALL PERMISSIONS ON ALL KEYSPACES TO [superuser];
 
-##Pour se simplifier la vie on personnalise notre bash csql
+## Pour se simplifier la vie on personnalise notre bash csql
 
 A partir de la racine du home directory de l'utilisateur root on va créer le fichier `.cassandra/cqlshrc`
 
@@ -148,7 +148,7 @@ On adapte les droits pour modérer les accès à ces données sensibles.
 
 Dorénavant cqlsh sans paramètre nous connectera avec notre superuser
 
-##Donnons un nom à notre Cluster
+## Donnons un nom à notre Cluster
 
 D'abord en cql
 	
@@ -165,11 +165,11 @@ On va purger les caches de confs de cassandra
 Et finalement on va redémarrer Cassandra et constater que le cluster a changer de nom avec 
 
 	cqlsh
-##A votre tour sur le noeud 2
+## A votre tour sur le noeud 2
 
 A vous de refaire la même config sur le noeud 2
 
-##Maintenant, faisons en sorte que ces deux noeuds rejoignent le même cluster.
+## Maintenant, faisons en sorte que ces deux noeuds rejoignent le même cluster.
 
 Ca va se jouer dans le fichier de conf `/etc/cassandra/cassandra.yaml`, on va éditer dans ce fichier de configuration de Cassandra des variables plus en rapport avec le cluster :
 
@@ -225,10 +225,10 @@ Ce dernier doit à présent montrer le 2 noeuds comme ceci
 	UN  172.20.0.4  219.36 KiB  256          100.0%            ae011865-f62c-42d1-bae6-b201429a6c55  rack1
 	UN  172.20.0.3  195.04 KiB  256          100.0%            6f8b7ecf-94aa-4993-8dfe-1e289a9eb296  rack1
 
-##Serez-vous capable d'ajouter un troisième noeud à ce cluster
+## Serez-vous capable d'ajouter un troisième noeud à ce cluster
 
 Si vous avez de l'avance, essayez d'ajouter seul le troisième noeud au cluster.
 
-##Manipulation
+## Manipulation
 
 On peut reprendre le TP0 en faisant des manipulations une fois sur un noeud, une fois sur lautre noeud et constaté l'accès transparent aux données.
