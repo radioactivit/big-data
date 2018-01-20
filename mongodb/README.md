@@ -439,15 +439,478 @@ La base de données à manipuler contient des lieux de différentes catégories 
 1. Importez le jeu de données tour-pedia.json dans une base de données “tourPedia” avec une collection “paris” ;
 2. Filtrez les lieux par type “accommodation” et service “blanchisserie” ;
 3. Projetez les adresses des lieux de type "accommodation" ;
+4. Projetez la note (rating) du dernier commentaire reçu par les documents de category restaurant
+5. Projeter la note min des restaurant
+4. Projeter la note max des restaurant
+5. Projeter la note moyenne des restaurant
 4. Filtrez les listes de commentaires (reviews) des lieux, pour lesquelles au moins un commentaire (reviews) est écrit en anglais (en) et a une note (rating) supérieure à 3 (attention, LE commentaire en anglais doit avoir un rang de 3 ou plus) ;
 5. Groupez les lieux par catégorie et comptez les ;
 6. Créez un pipeline d’agrégation pour les lieux de catégorie "accommodation", et donnez le nombre de lieux par valeur de "services".
-
+7. Updater les restaurants de la base et ajouter un champs typeDeCuisine contenant la valeur indefini
+8. Selectionner les 5 restaurants les mieux notés.
+8. Updater toute la base de données en ajouter le champs avgRating qui sera la moyenne des ratings
+9. Selectionner les 5 restaurants les mieux notés.
+10. Faire un update et attribuer un certificat d'excellence (nouveau champs à créer) pour tous les restaurants ayant une bonne note moyenne et un nombre de reviews suffisante (définissez vous même la condition en fonction des données à disposition).
 
 ## TP 3 - Admin système simple
 
+### Conf générale
+
+Un ReplicaSet doit contenir au minimum 3 serveurs (1 Primary et 2 Secondary) pour garantir un minimum de tolérance aux pannes. Un ReplicaSet peut contenir jusqu’à 50 serveurs ; toutefois lorsqu’un vote a lieu pour élire le nouveau Primary, au maximum 7 peuvent participer à cette élection (les premiers ayant répondu à l’Arbiter).
+
+Nous allons monter une architecture de replicaset à 4 noeuds :
+
+* 1 primaire
+* 2 secondaires
+* 1 arbitre
+
+![](img-md/replicaSet.png)
+
+On part d'une image ubuntu fraichment installé sur les 4 machines.
+
+Mongo stocke ses paquets sur un serveur HTTPS (et c'est bien). Mais par contre, il va falloir que notre distribution accepte le https (on installe discrètement nano également) :
+
+	apt-get update && apt-get install apt-transport-https nano wget unzip -y
+
+Il faut ajouter le paquet mongo au repository apt
+
+	echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.6 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.6.list
+	
+Et signer le paquet :
+
+	apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+
+On update les paquets apt :
+
+	apt-get update
+	
+On installe mongo version community
+
+	apt-get install -y mongodb-org
+	
+On reprend ces étapes sur toutes les machines.
+
+### Lancement replicaset sur le primaire
+
+On créé l'espace de stockage pour notre replicaSet rsBigData
+
+	mkdir /data && mkdir /data/dbRsBigData
+	
+On lance le serveur csur le replicaSet, dans notre cas on va le faire écouter sur toutes les IPs de la machine : 
+	
+	mongod --replSet rsBigData --bind_ip_all --dbpath /data/dbRsBigData > /dev/null&
+	
+On va ensuite initialiser le replicaset sur notre machine primaire, pour ça on se connecte à mongo
+
+	mongo
+	
+Et dans mongo on lance la commande
+
+	rs.initiate();
+	
+On constate que mongo est bien primaire sur cette instance et on peut effectuer quelques commandes pour accèder à la configuration ou voir l'état sur replicaSet
+
+	rs.conf();
+	rs.status();
+	
+### Mise en place des machines secondaires
+
+On va lancer les machines secondaires comme la primaire avec les commandes
+
+	mkdir /data && mkdir /data/dbRsBigData
+	mongod --replSet rsBigData --bind_ip_all --dbpath /data/dbRsBigData > /dev/null&
+	
+Une fois ces commandes lancées, mongodb tourne sur nos machines primaire et secondaire sur le même replicaset potentiel `rsBigData`. Par contre, c'est à la macine primaire de les intégrer à sa configuration/
+
+On retourne sur la machine primaire pour ajouter les deux secondaires au replicaset :
+
+	rs.add("dockermongodbcluster_mongo-secondary-a_1");
+	rs.add("dockermongodbcluster_mongo-secondary-b_1");
+	
+On va pouvoir constater la mise en place du replicaSet :
+
+	rs.status()	
+
+### Mise en place de l'arbitre
+
+On va créer un arbitre, pour ça on va en faire un candidat classique (on va juste changer le repertoire de stockage de data) pour le replicaset
+
+	mkdir /data && mkdir /data/dbRsBigDataArb
+	mongod --replSet rsBigData --bind_ip_all --dbpath /data/dbRsBigDataArb > /dev/null&
+	
+On ajoute l'arbitre sur le primaire :
+
+	rs.addArb("dockermongodbcluster_mongo-arbitre_1")
+	
+On va tester un peu la bète sur le primaire :
+
+	cd
+	wget https://s3-eu-west-1.amazonaws.com/course.oc-static.com/courses/4462426/restaurants.json_.zip
+	unzip restaurants.json_.zip
+	mongoimport --db new_york --collection restaurants restaurants.json
+	mongo
+	
+Dans mongo (sur les différents noeuds)
+	
+	use new_york
+	db.restaurants.find({})
+	
+Sur les secondaires il faut autoriser les secondaires à répondre au requête :
+
+	rs.slaveOk()
+
+On va mettre le primaire en panne, constater l'election d'un des secondaires, requeter la donnée, et remonter le primaire qui est maintenant secondaire.
+
+### Conf plus simple
+
+#### Ajouter les machines au replicaset
+
+Si toutes les machines tournaient, on aurait pu configurer le primary et tous les secondary en 1 fois :
+
+	rsconf = {
+          _id: "rsBigData",
+          members: [
+                     {_id: 0, host: "dockermongodbcluster_mongo-primary_1"},
+                     {_id: 1, host: "dockermongodbcluster_mongo-secondary-a_1"},
+                     {_id: 2, host: "dockermongodbcluster_mongo-secondary-b_1"}
+                   ]
+        };
+	rs.initiate (rs.conf) ;
+
+#### le fichier de conf mongod.conf
+
+EN prod, il est préféreable de gérer la config du serveur dans un fichier plutôt que de l'improviser à chaque fois qu'on lance le daemon Mongo. On peut en effet gérer la config du serveur dans `/etc/mongod.conf`
+
+	systemLog:
+	  destination: file
+	  path: "/var/log/mongodb/mongod.log"   #Fichier de log que nous verrons ensuite
+	  logAppend: true
+	
+	storage:
+	  journal:
+	     enabled: true
+	
+	processManagement:
+	  fork: true
+	#Permet de lancer le processus et de reprendre la main
+	
+	net:
+	  bindIp: 0.0.0.0
+	  port: 27017
+	#Adresse du serveur local et port d’écoute (ici on écoute sur tout ce qui n'est pas conseillé en production)
+	
+	replication:
+	  oplogSizeMB: 512
+	  replSetName: rs0
+	#Le nom de votre ReplicaSet
+	
+	sharding:               #A voir dans le TP suivant
+	  clusterRole: shardsvr #C’est le mode par défaut. Sinon "configsvr"
+	  
+Pour lancer le daemon en utilisant cette configuration :
+	
+	mongod --config mongod.conf
+
+La doc de configuration => [https://docs.mongodb.com/manual/reference/configuration-options/]()
+
+#### La réplication, comment ça marche?
+
+On est dans un fontionnement proche de la replication maitre esclave mysql, en effet la réplication va se basé sur un système de journalisation qui sera lu par les membres du réplicaSets pour assurer la réplications.
+
+Ce log est lui même une collection MongoDB qui a été créé à l'initialisation du replicaSet :
+
+On peut aller le consulter comme une table classique :
+
+	use local;
+	db.oplog.rs.find().pretty();
+	
+En fonction de la charge d'écriture du replicaSet il peut être interressant d'augmenter la taille maximale de ce journal. La taille par défaut dépend de plusieurs paramêtres : en particulier l'OS et le moteur de stockage.
+
+Le moteur de stockage par défaut de mongoDB est wiredTiger : [https://docs.mongodb.com/v3.2/core/wiredtiger/index.html]()
+
+#### Haute disponibilité?
+
+Pour spécifier l'odre de reprise du primary des machines lors d'une election :
+
+	cfg = rs.conf();
+	cfg.members[0].priority = 0.5;
+	cfg.members[1].priority = 2;
+	cfg.members[2].priority = 3;
+	
+	rs.reconfig(cfg);
+	
+Si on stoppe le primary ou si on le met juste de coté pour forcer une réélection :
+
+	rs.freeze(120)
+	
+Concerant la gestion de la disponibilité, plusieurs politique sont proposées :
+
+* Primary : valeur par défaut, lecture sur le serveur d’écriture.
+* PrimaryPreferred : si jamais le PRIMARY n’est plus disponible, les requêtes sont routées vers le SECONDARY en attendant que celui-ci réapparaisse (ou qu’un nouveau soit élu).
+* Secondary : Routé uniquement sur les SECONDARY. Cela soulage la charge du serveur primaire. Toutefois, on perd alors en cohérence puisque les données sont répliquées de manière asynchrone.
+* Nearest : Le serveur physique le plus proche sur le réseau (latence la plus faible) est interrogé directement par le client. Là non plus, la cohérence n'est pas garantie.
+
+C'est le paramètre localThresholdMS dans la réplication qui va indiquer quelle politique est appliqué sur les lectures
+
+	replication :
+	    localThresholdMS: <"primary"|"primaryPreferred"|"Secondary"| "Nearest">
+
+On peut également changer la manière dont les données sont répliqué (on change de position sur le diagramme de CAP mais c'est au prix de performance plus faible).
+
+	replication :
+	    readConcern: <"majority"|"local"|"linearizable">
+
+* local : mode par défaut, les mises à jours sont asynchrones, seul le primaire est consulté
+* majority : on vérifie que la majorité des replicats est synchronisée
+* linearizable : la lecture des données sera ordonnée en fonction de l’instant d’écriture et de lecture. Cela réduit considérablement les performances de MongoDB
+
 ## TP 4 - Admin système complexe
 
-## TP 5 - GridFS
+On va gérer un cluster plus puissants en mettant en place une politique de sharding puissante.
 
-## TP 6 - exercice 2
+Pour ça, on a 3 types de noeuds mongo :
+
+* routeur : mongos. Il s’occupe du routage des requêtes. Il stocke les informations sur l’arbre permettant de répartir les données (voir le chapitre sur le sharding). Ainsi, bien qu’il soit un point central de l’architecture, le temps de traitement est rapide. Il faut minimum deux routeurs pour permettre de gérer la tolérance aux pannes de celui-ci.
+* Serveur de configuration : Config Server. Ils s’occupent de la connaissance du réseau, aussi bien au niveau des routeurs que les shards. Ils vont ainsi stocker les informations sur l’arbre de routage utilisé par les routeurs ; permettant de synchroniser celui-ci et de l’intégrer à un nouveau routeur. Ils gèrent également les informations de répartition de charge sur les différents shards, et la structure des ReplicaSets (vu dans le chapitre précédent) permettant de rééquilibrer la charge des serveurs si la répartition des données est inégale. Les ConfigServers sont au nombre de 3 et organisés en ReplicaSet pour garantir l’intégrité du réseau. L’idéal est de les placer à des endroits clés du réseau pour des questions de pérennité du système (rack différents, proches des routeurs).
+* Des serveurs de données : Shard. Ils contiennent l’ensemble des données, les chunks. Ils peuvent contenir plusieurs chunks, mais pas forcément contigus (tri des données de l’arbre).
+
+La configuration minimum est  2 mongos, 3 Config Servers et 2 shards.
+
+![](img-md/sharding.png)
+
+### Les configs serveurs
+
+On va ajouter les paquets de manipulation réseau
+	
+	apt-get update && apt-get install net-tools nano iputils-ping -y
+	
+	netstat -paunt
+
+On va lancer sur les serveurs de configs le replicaSet en mode config server
+
+	mkdir /data
+	mkdir /data/confRsBigData
+	mongod --configsvr --replSet rsBigDataConf --bind_ip_all --dbpath /data/confRsBigData > /dev/null&
+	
+Puis sur le a, on va initer le replicaSet et ajouter l'autre serveur au replicaSet
+
+	rs.initiate();
+	rs.add("dockermongodbsharding_mongo-config-b_1:27019");
+	rs.add("dockermongodbsharding_mongo-config-c_1:27019");
+
+### Les shards
+
+On va lancer sur les deux shards des replicaSet de une machine.
+
+Sur le premier :
+
+	mkdir /data
+	mkdir /data/shardRsBigData
+	mongod --shardsvr --replSet rsBigDataSh1 --bind_ip_all --dbpath /data/shardRsBigData > /dev/null&
+	
+et en mongo
+	
+	rs.initiate(
+	   {
+	      _id: "rsBigDataSh1",
+	      version: 1,
+	      members: [
+	         { _id: 0, host : "dockermongodbsharding_mongo-shard-rs-a_1:27018" },
+	      ]
+	   }
+	)
+	
+Sur le deuxième :
+	
+	mkdir /data
+	mkdir /data/shardRsBigData
+	mongod --shardsvr --replSet rsBigDataSh2 --bind_ip_all --dbpath /data/shardRsBigData > /dev/null&
+	
+et en mongo
+
+	rs.initiate(
+	   {
+	      _id: "rsBigDataSh2",
+	      version: 1,
+	      members: [
+	         { _id: 0, host : "dockermongodbsharding_mongo-shard-rs-b_1:27018" },
+	      ]
+	   }
+	)
+	
+### Les routeurs
+
+On va lancer les routeurs mongo en les connectant au serveurs de config
+
+	mongos --configdb rsBigDataConf/dockermongodbsharding_mongo-config-a_1:27019,dockermongodbsharding_mongo-config-b_1:27019,dockermongodbsharding_mongo-config-c_1:27019 --bind_ip_all --port 27017 > /dev/null&
+	
+On se connecte ensuite à mongo sur un routeur
+
+	mongo
+	
+Et on va ajouter les noeuds de sharding :
+
+	sh.addShard( "rsBigDataSh1/dockermongodbsharding_mongo-shard-rs-a_1:27018");
+	sh.addShard( "rsBigDataSh2/dockermongodbsharding_mongo-shard-rs-b_1:27018");
+	
+Pour vérifier la config
+
+	sh.status()
+	
+### On a notre noeud de sharding complètement configuré, on va répartir les datas
+
+On va créer une base tesdb et une collection test, les documents seront répartis dans les shards par son _id :
+
+	use testDB;
+	sh.enableSharding("testDB");
+	db.createCollection("test");
+	db.test.createIndex({"_id":1});
+	sh.shardCollection("testDB.test",{"_id":1});
+	
+> enableSharding ne marche que sur une collection préalablement vide. Toute collection déjà existante ne peut être distribuée. Il faudra ainsi importer les données dans la collection « shardée ».
+
+On va réimporter les restaurants dans cette nouvelle config depuis un routeur :
+
+	apt-get update && apt-get install wget unzip -y
+	cd
+	wget https://s3-eu-west-1.amazonaws.com/course.oc-static.com/courses/4462426/restaurants.json_.zip
+	unzip restaurants.json_.zip
+	mongoimport --db testDB --collection test restaurants.json
+	mongo
+
+On peut vérifier ensuite les shards 
+
+	sh.status()
+	
+
+### Stratégie de distribution
+
+#### Requête par zone
+
+On peut aller plus loin que laisser le système répartir ses noeuds, par exemple on peut répartir les documents par zipcode 
+
+	sh.shardCollection("testDB.test2", {"address.zipcode" : 1});
+	
+Néanmoins, on ne contrôle pas encore la répartition, pour ça on doit préciser notre politique de répartition :
+
+	sh.addTagRange("testDB.test2", 
+	    {"address.zipcode": "10001"}, {"address.zipcode":  "11240"},
+	    "NYC")
+	sh.addTagRange("testDB.test2", 
+	    {"address.zipcode": "94102"}, {"address.zipcode":  "94135"},
+	    "SFO")
+
+En faisant cela on a créé un range NYC et un range SFO (on ne les a pas encore attribué au shard)
+
+En cas de surcharge d'un noeud, on pourra reprendre les ranges en les divisant:
+
+	sh.addTagRange("testDB.test2",
+	    {"address.zipcode": "10001"}, {"address.zipcode": "10281"},
+	    "NYC-Manhattan")
+	sh.addTagRange("testDB.test2",
+	    {"address.zipcode": "11201"}, {"address.zipcode": "11240"},
+	    "NYC2-Brooklyn")
+
+
+Pour associer les tags aux replicaSet de sharding :
+
+	sh.addShardTag("rsBigDataSh1", "NYC")
+	sh.addShardTag("rsBigDataSh2", "NYC")
+	sh.addShardTag("rsBigDataSh1", "SFO")
+
+Ces informations sont stockés dans dans la base config, on peut les retrouver en faissant des requètes de bases :
+
+	use config;
+	db.shards.find({ "tags" : "NYC" });
+
+#### Requête par catégorie
+
+MongoDB ne permet qu'une seule méthode de répartition par collection mais si l'on a des requètes à optimiser sur une catégorie on peut choisir de répartir les documents par un hachage 
+
+	sh.shardCollection( "testDB.test3", { "borough" : "hashed" } )
+
+Attention, on ne supportera plus que des requètes d'égalité sur la clef de hashage et plus d'interval ou de tri.
+
+### Index
+
+Après avoir reparti une collection par shard, on se retrouve avec des executions de requètes plus longue 
+
+	db.test.find({"address.street" : "3 Avenue"}).explain()
+	
+La fonction ".explain()" appliquée à une requête permet de consulter le plan d’exécution généré. Ici, le plan « WinningPlan » possède une étape (stage) « SHARD_MERGE » qui effectue la fusion des résultats provenant de deux « COLLSCAN » (« Collection Scan »), en l’occurrence un scan complet de la collection pour chaque shard. Cela correspond à une lecture complète du contenu des chunks, ce qui n’est pas très efficace.
+
+	db.test.createIndex({"address.street" : 1})
+
+Si on refait la même requète, on constate l'utilisation de IXSCAN, l'index existe et est consulté sur tous les shards. Contrairement à une requète sur la clef de sharding qui peut n'impliquer que les shards concernés, cette requète utilisera les index de tous les shards mais plus les valeurs.
+
+
+## TP 5 - l'exercice du formateur fainéant
+
+Et revoilà au loin le formateur fainéant, il va encore nous sortir tout prèt de sa manche un TP pompé sur le net.
+
+En effet : [http://b3d.bdpedia.fr/mongodb_tp.html]()
+
+## TP 6 - GridFS
+
+GridFS est un systeme de stockage qui va permettre de franchir la limite théorique de 16mb par document imposé par mongo en stockant un fichier en plusieurs parties.
+
+On va pouvoir stocker des fichiers dans une une table dédié FS. Ces fichiers seront ensuite référencés dans la deocument source en utilisant leur adresse de sharding.
+
+On manipulera les fichiers avec la commande mongofiles
+
+Dans un cas d'usage de développement classique, on utilisera un des nombreux drivers disposnible en fonction du langage :
+
+* https://github.com/lykmapipo/mongoose-gridfs
+* http://api.mongodb.com/python/current/api/gridfs/
+* http://api.mongodb.com/java/current/com/mongodb/gridfs/GridFS.html
+* ...
+
+Pour notre exemple on va télécharger quelques images sur le serveur et les uploader sur notre installation de mongoDB avec mongofiles
+
+	apt-get update && apt-get install net-tools nano iputils-ping wget -y
+	cd
+	wget https://www.dokkan-battle.fr/wp-content/uploads/2017/08/dragon-ball-z-death-232158-jpg-997067.jpg -O image1.jpg
+	wget https://i.ytimg.com/vi/eoJhC8lSq8I/maxresdefault.jpg -O image2.jpg
+	wget https://vignette.wikia.nocookie.net/dragonball/images/5/5c/Dragon_ball_z_vol_68_babidi_rivals_image_oTPbVUjVjWTdLjq.jpeg/revision/latest?cb=20100114064458 -O image3.jpg
+	wget https://www.dragon-ball-z.org/galerie/Sangohan/dragon-ball-z-sangohan.jpg -O image4.jpg
+	wget http://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_480p_surround-fix.avi -O video.mp4
+	
+On va créer la collection gfs dans la base testGFS. Et on va ajouter les fichiers. Documentation officielle de mongofiles : [https://docs.mongodb.com/manual/reference/program/mongofiles]()
+
+	mongofiles -d testGFS put image1.jpg
+	mongofiles -d testGFS put image2.jpg
+	mongofiles -d testGFS put image3.jpg
+	mongofiles -d testGFS put image4.jpg
+	mongofiles -d testGFS put video.mp4
+
+Dans robo3T on peut constater l'ajout dans la base de données de collections spécifiques à gridFS qui vont stocker les fichiers en blocs de 16MB maximum. Les fichiers dans fs.files découpé dans fs.chunks.
+
+Pour lister tous les fichiers :
+	
+	mongofiles -d testGFS list
+
+Pour supprimer un fichier :
+
+	mongofiles -d testGFS delete image1.jpg
+
+On vérifie :
+
+	mongofiles -d testGFS list
+
+Pour chercher tous les fichiers dont le nom contient image
+
+	mongofiles -d testGFS search image
+
+Pour chercher tous les fichiers dont le nom contient video
+
+	mongofiles -d testGFS search video
+
+Pour récupérer le fichier video.mp4
+
+	mongofiles -d testGFS get video.mp4
+
+## TP 7 - exercice 2
+
+Si on a le temps on va refaire un exercice honteusement volé :
+
+[https://stph.scenari-community.org/contribs/nos/Mongo2/co/Mongo_Exercices.html]()

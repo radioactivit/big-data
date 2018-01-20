@@ -1,2 +1,2 @@
-FROM ubuntu
+FROM mongo
 CMD sleep infinity

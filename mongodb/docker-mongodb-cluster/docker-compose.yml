@@ -3,6 +3,8 @@ services:
   mongo-primary:
     build: .
     expose: [27017,27018,27019]
+    ports:
+      - 27017:27017
   mongo-arbitre:
     build: .
     expose: [27017,27018,27019]
@@ -12,7 +14,3 @@ services:
   mongo-secondary-b:
     build: .
     expose: [27017,27018,27019]
-  nginx:
-    image: nginx
-    ports: 
-      - 80:80
