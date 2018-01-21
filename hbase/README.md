@@ -1,17 +1,21 @@
 # Hbase
 La partie Hbase de la formation
 
-##TP 0 Introduction
-###Installation
+## TP 0 Introduction
+
+### Installation
+
 Installer Hbase en local sur les postes
-Dans le dossier hbase-docker, on execute un `docker compose up -d`
+Dans le dossier hbase-docker, on execute un `docker-compose up -d`
 
 Cela va lancer un cluster Hbase minimum pour nos premiers exercices.
 
-###Test des interfaces (hors thrift)
+### Test des interfaces (hors thrift)
+
 On regarde les ports ouverts en faisant un "docker-compose ps" et on teste les urls en localhost avec les ports associés
 
-###Manipulation shell
+### Manipulation shell
+
 On se connecte en shell au region server `docker exec -it regionserver-1 bash`
 
 On est connecté au shell du container "regionserver-1". On peut se connecter au shell Hbase avec `hbase shell`.
@@ -98,8 +102,10 @@ Une documentation plutôt bien faite sur les filters et les commande shell:
 * [http://www.hadooptpoint.org/filters-in-hbase-shell/](http://www.hadooptpoint.org/filters-in-hbase-shell/)
 * [http://www.hadooptpoint.org/hbase-shell-commands/](http://www.hadooptpoint.org/hbase-shell-commands/)
 
-##TP 1 Python/HappyBase
-###Accèder à la console python
+## TP 1 Python/HappyBase
+
+### Accèder à la console python
+
 En même temps que la base HBase en cluster simple, le script a lancé un container HappyBase.
 
 Cette image donne accès à un shell avec python et happybase préinstallés ainsi que le reperoire docker-hbase/happybaseDocker/python monté en sur workdir code.
@@ -112,18 +118,28 @@ Documentation happybase :
 
 
 
-###Ensuite
+### Ensuite
+
 On va executer en python dans l'order étape par étape et dans l'ordre numéroté les 4 fichiers.
-##TP 2 Python/HappyBase
+
+## TP 2 Python/HappyBase
+
 Même méthode d'accès console que le TP1, on récupère la source de data les-arbres.csv et on va éxécuter ensemble les fichiers. Sur le fichier 3, c'est à vous de travailler.
-##TP3
+
+## TP3
+
 CF le readme dans le repetoire phoenix
-##Bonus MapReduce
+
+## Bonus MapReduce
+
 On retourne dans python...
 
 Il y a mrjob installer qui permet d'utiliser les taches map/reduce haddop avec python.
 
 ### locally
-`python mr_word_freq_count.py ../share/les-arbres.csv > counts`
+
+	python mr_word_freq_count.py ../share/les-arbres.csv > counts
+
 ### Sur un cluster 
-`python mr_word_freq_count.py ../share/les-arbres.csv -r hadoop > counts`
+
+	python mr_word_freq_count.py ../share/les-arbres.csv -r hadoop > counts
