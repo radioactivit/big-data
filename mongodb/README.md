@@ -89,7 +89,7 @@ Voici quelques étapes de modélisation qui vont vous permettre de produire des 
 * **Une association avec des relations 1-n des deux côtés.** Cette fois-ci, c’est plus délicat pour l’entité Etablissement. Une personne peut avoir plusieurs emplois et un employeur, plusieurs employés. De fait, une imbrication de l’employeur dans Personne peut avoir de gros impacts sur les mises à jour (tous les employés à mettre à jour !). Il est donc peu recommandé d’effectuer une fusion complète. Pour cela, seule l’association est imbriquée sous forme d’une liste de documents, intégrant les attributs (qualité et date), ainsi qu’une référence vers l’employeur. Ainsi : “[{emploie+ref}]”
 * **Même taux de mises à jour.** Dans le cas des emplois d’une personne, là également nous pourrions effectuer une fusion de l’association “emploie”. En effet, le taux de mises à jour des emplois est équivalent à celui de la Personne, de fait, sans incidence sur les problèmes de cohérence de données.
 
-![](img-md/Fusion_Schema_1.png)
+![](img-md/Fusion_Schema_2.png)
 
 	db.test.save({
 	  "nom" : "Travers",   "prenom" : "Nicolas",
@@ -848,7 +848,7 @@ Si on refait la même requète, on constate l'utilisation de IXSCAN, l'index exi
 
 Et revoilà au loin le formateur fainéant, il va encore nous sortir tout prèt de sa manche un TP pompé sur le net.
 
-En effet : [http://b3d.bdpedia.fr/mongodb_tp.html]()
+En effet : [http://b3d.bdpedia.fr/mongodb_tp.html](http://b3d.bdpedia.fr/mongodb_tp.html)
 
 ## TP 6 - GridFS
 
@@ -875,7 +875,7 @@ Pour notre exemple on va télécharger quelques images sur le serveur et les upl
 	wget https://www.dragon-ball-z.org/galerie/Sangohan/dragon-ball-z-sangohan.jpg -O image4.jpg
 	wget http://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_480p_surround-fix.avi -O video.mp4
 	
-On va créer la collection gfs dans la base testGFS. Et on va ajouter les fichiers. Documentation officielle de mongofiles : [https://docs.mongodb.com/manual/reference/program/mongofiles]()
+On va créer la collection gfs dans la base testGFS. Et on va ajouter les fichiers. Documentation officielle de mongofiles : [https://docs.mongodb.com/manual/reference/program/mongofiles](https://docs.mongodb.com/manual/reference/program/mongofiles)
 
 	mongofiles -d testGFS put image1.jpg
 	mongofiles -d testGFS put image2.jpg
@@ -913,4 +913,12 @@ Pour récupérer le fichier video.mp4
 
 Si on a le temps on va refaire un exercice honteusement volé :
 
-[https://stph.scenari-community.org/contribs/nos/Mongo2/co/Mongo_Exercices.html]()
+[https://stph.scenari-community.org/contribs/nos/Mongo2/co/Mongo_Exercices.html](https://stph.scenari-community.org/contribs/nos/Mongo2/co/Mongo_Exercices.html)
+
+## TP 8 - Exemple de Map Reduce mongoDB
+
+[http://www.lafabriquedecode.com/blog/2013/05/mongodb-un-exemple-de-map-reduce/](http://www.lafabriquedecode.com/blog/2013/05/mongodb-un-exemple-de-map-reduce/)
+
+et la doc officielle :
+
+[https://docs.mongodb.com/manual/tutorial/map-reduce-examples/](https://docs.mongodb.com/manual/tutorial/map-reduce-examples/)
