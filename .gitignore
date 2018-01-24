@@ -28,3 +28,6 @@ Temporary Items
 hbase/docker-hbase/happybaseDocker/python/premierExemple/3_readTable_b.py
 hbase/data_source/les-arbres.csv
 cassandra/share/restaurants/
+
+neo4j/docker-neo4j/plugins/*
+!neo4j/docker-neo4j/plugins/.gitkeep
