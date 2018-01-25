@@ -120,7 +120,86 @@ Faisons, dans l'ordre pour faire un petit tour du propriétaire :
 	:play concepts
 	:play cypher
 	
-Puis :
+## TP 1 - Jeux avec Cypher
+
+Cypher Query Language, CQL, est LE langage de requêtage de Neo4j. Il permet d'exprimer des relations complexes entre noeuds avec des simples parenthèses et crochets.
 
 	:play movies
+	:play https://radioactivit.glitch.me/neo4j.html
+	
+
+## TP 2 - Vous avez dit normalisation ?
+
 	:play northwind-graph
+
+## TP 3 - Créer d'extensions pour Neo4j
+
+On peut étendre les fonctionnalités de Neo4j. Pour ce faire, Neo4j propose notamment trois possibilités :
+
+- Créer des procédures stockées. Ce sont des routines qu'on appelle en les préfixant avec CALL. Elles peuvent prendre des paramètres et rendre des résultats. Elles peuvent modifier des éléments de la base de données si on le souhaite. On pourrait par exemple imaginer une procédure deleteNodesThatAreNotLinkedToOtherNodes qui prendrait aucun paramètre et se chargerait d'effectuer des requêtes pour identifier des noeuds liés à aucun noeud et de s'en débarrasser. On précise évidemment que étant donnés de tels noeuds, on n'aura pas besoin de les détacher... Mais vous l'aviez compris !
+- Créer des fonctions. Elles prennent en paramètre quelque chose (ou pas) et rende une seule valeur. Elles sont read-only. On pourrait penser à une fonction numberOfCharacters qui donnerait le nombre de caractères de la String qu'elle a en entrée, multiplyByTwo qui multiplierait par deux ce qu'elle reçoit en entrée si tant est que c'est un nombre
+- Créer des fonctions d'aggrégation. Elles prennent en paramètre plusieurs enregistrements et rendent une seule valeur. Comme COUNT, SUM, AVG... On pourrait par exemple imaginer des fonctions d'aggrégation complexes comme des median qui donnerait la médiane des valeurs entrées, countDistinct qui donnerait le nombre de valeurs distinctes (sans avoir besoin de faire un COUNT DISTINCT), countIfSuperiorThanTwo qui compterait les valeurs que si elles sont plus grandes que 2...
+
+Pour créer de telles extensions à Neo4j, c'est plutôt fastidieux comparé à ce qu'on peut trouver rien qu'en MySQL. En MySQL, directement en tapant une "requête", on peut ajouter de nouvelles fonctions ou procédures stockées. Là, ce n'est pas le cas. Il faut créer un projet Java, le compiler et mettre le .jar dans ce fameux dossier plugins qui vous fait tant rêver depuis le début.
+
+D'abord, on va cloner le répertoire exemple de Neo4j n'importe où sur notre système :
+
+    git clone https://github.com/neo4j-examples/neo4j-procedure-template
+   
+Bien sûr, ne pas hésitez à consulter le Readme pour voir ce que contient ce projet qu'on clone et à quoi il sert :
+
+	https://github.com/neo4j-examples/neo4j-procedure-template
+
+Ensuite :
+
+    cd neo4j-procedure-template
+
+Puis on va taper cette ligne de commande :
+
+    docker run -it -v "$PWD":/usr/src/mymaven -w /usr/src/mymaven maven bash
+
+Qui saurait transformer cette ligne de commande en un docker-compose.yml tout propre ?
+
+Cette commande consiste en lancer un container basé sur l'image appelée maven. Maven est un gestionnaire de paquets du langage de programmation Java.
+Il sait lire un fichier pom.xml comme celui qui est présent dans le dossier que nous venons de cloner et y réaliser les actions qu'on lui a demandé de réaliser. Des descriptions sur l'image maven sont disponibles ici : https://hub.docker.com/_/maven/
+
+Pour demander à Maven de faire tout le boulot qu'on lui a demandé dans pom.xml :
+
+    mvn clean install
+
+On observe notamment que maven télécharge des packages puis finit par créer un (voire 2) .jar.
+
+On peut glisser le fichier procedure-template-1.0.0-SNAPSHOT.jar dans le dossier plugins.
+
+Neo4j ne le voit pas immédiatement. On doit relancer notre container.
+
+On peut donc notamment faire :
+
+	docker-compose stop && docker-compose up -d
+
+(Dans le dossier docker-neo4j mais ça va de soi)
+
+Et on devrait si on va sur le browser voir les nouveautés (commence par example, c'est le namespace du package) qu'on a ajouté en faisant :
+
+	CALL dbms.functions()
+	CALL dbms.procedures()
+
+Essayons par exemple d'appeler :
+	
+	RETURN example.join(["Formation","Big","Data"])
+
+Puis
+
+	UNWIND [{name:"a"},{name:"b"},{name:"c"}] as rows
+	RETURN example.last(rows)
+
+Puis
+
+	MATCH (n:Person)
+	CALL example.index(id(n), ['name']);
+	
+Puis
+
+	CALL example.search('Person','name:Jo*') YIELD nodeId
+
+Ok, maintenant, il faut explorer le projet Java qui se situe dans le dossier src du dossier neo4j-procedure-template pour voir comment on a ajouté ces fonctions !
