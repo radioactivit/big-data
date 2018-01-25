@@ -16,7 +16,7 @@ On entre dans le bash de l'image mongo
 Mongodb est installé avec plusieurs executables, essayez de les appeler avec --help pour comprendre leur fonctionnement :
 
 * mongod : l'executable serveur ordinaire
-* mongos : l'executatble serveur pour les shards
+* mongos : l'executable serveur pour les noeuds de type routeur
 * mongodump : la commande pour dumper la base mongoDB en bson
 * mongorestore : l'outil pour restorer une install de mongoDB à partir de fichier .bson
 * mongoexport : un exporteur en csv/json

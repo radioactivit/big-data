@@ -144,7 +144,7 @@ On va créer un KEYSPACE de test pour jouer avec les collections :
 
 ### les Sets
 
-Un set est un groupe d'element qui est retrourné dans l'ordre d'insertion au moment de la requête. On va l'illustrer avec un stockage d'email multiple
+Un set est un groupe d'element qui est ordonné par valeur croissante (au sens alphabétique) au moment de la requête. On va l'illustrer avec un stockage d'email multiple
 
 On créé la table users avec un set 
 
