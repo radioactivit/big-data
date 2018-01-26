@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  elasticsearch-a:
+    build: .
+    expose: [ 9200, 9300 ]
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - ../share:/tmp/share
+  elasticsearch-b:
+    build: .
+    expose: [ 9200, 9300 ]
+    volumes:
+      - ../share:/tmp/share
+  elasticsearch-c:
+    build: .
+    expose: [ 9200, 9300 ]
+    volumes:
+      - ../share:/tmp/share
