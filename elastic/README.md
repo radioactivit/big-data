@@ -10,7 +10,7 @@ On va se rendre dans le dossier docker-elastic et lancer le proverbial
 	
 On va manipuler ElasticSearch via Postman comme nous l'avons déjà fait avec SolR. En effet, le serveur elsaticSearch est exposé en WS et requêtable en JSON.
 
-Pour constater que le serveur est lancé, on va appeller en `GET`dans postman l'adresse [http://localhost:9200]() Le retour est de cette forme
+Pour constater que le serveur est lancé, on va appeller en `GET`dans postman l'adresse [http://localhost:9200](http://localhost:9200) Le retour est de cette forme
 
 	{
 	    "name": "IiPrEYt",
@@ -335,7 +335,231 @@ Elastic search utilise le modèle du sharding pour sa distribution de data.
 
 ![](img-md/sharding.png)
 
-On va commencer par lancer elasticsearch sur le premier container (les container sont préinstallés avec elasticSearch) :
+On va commencer par lancer elasticsearch sur le premier container (les container sont préinstallés avec elasticSearch). On accède au container avec la commande habituelle :
 
+	docker exec -it dockerelasticcluster_elasticsearch-a_1 bash
 
+Avant de pouvoir le lancer, il convient de préparer un petit peu la configuration, pour cela, on va accèder au fichier de conf `etc/elasticsearch/elasticsearch.yml` avec votre éditeur de texte favori (bien entendu nano).
 
+	nano etc/elasticsearch/elasticsearch.yml
+	
+On va intervenir sur le nom du cluster (qu'on appelera bigdata-paris) ainsi que sur l'adresse d'écoute du serveur pour authoriser les containers à communiquer ensemble.
+
+	...
+	
+	cluster.name: bigdata-paris
+	
+	...
+	
+	network.host: 0.0.0.0
+	
+	...
+	
+	discovery.zen.ping.unicast.hosts: ["dockerelasticcluster_elasticsearch-a_1", "dockerelasticcluster_elasticsearch-b_1", "dockerelasticcluster_elasticsearch-c_1"]
+	
+Ensuite on lance elasticsearch avec notre commande basée sur `service`
+
+	service elasticsearch start
+	
+On vérifie que le service est lancé
+	
+	service elasticsearch status
+	
+Et comme on a travaillé sur le serveur A et que notre fichier docker-compose a exposé le port a sur notre machine local, on peut interrogé le serveur A via postman en faisant un appel `GET` à l'url [http://localhost:9200](http://localhost:9200)
+
+La visualisation de l'état du cluster est disponible en `GET` à cette adresse : [http://localhost:9200/_cluster/health](http://localhost:9200/_cluster/health). On y constatera que le nom du cluster est maintenant bigdata-paris
+
+Il y a trois états du cluster :
+
+* green : le sharding primaire et ses réplicats sont correctements répartis en fonction de notre configuration (toutes les données sont au bon endroit et suffisament répliquées)
+* yellow : le sharding primaire est OK mais il y a des réplicats qui ne sont pas suffisament répliqués au regard de otre configuration, il convient de lancer plus de noeuds pour répartir les réplicats (le cluster récupérera tout seul son état vert lorsque suffisament de noeuds seront lancés).
+* red : un noeud primaire est indisponible.
+
+Actuellement, nous n'avons pas de données, on est en état green. On va réinjecter le fichier movies.json du TP0 et constater que la base est passé en état yellow car sur un seul noeud de cluster, les replicats sont absents. On peut voir le détail des shards en appelant en `GET` l'url [http://localhost:9200/_cat/shards](http://localhost:9200/_cat/shards)
+
+On va constater que les shards 'p' dit primaire sont présent mais que les noeuds de replicats sont absents d'où le passage en yellow.
+
+### Le second noeud
+
+Comme pour le premier noeud :
+
+On va lancer elasticsearch sur le deuxième container (les container sont préinstallés avec elasticSearch). On accède au container avec la commande habituelle :
+
+	docker exec -it dockerelasticcluster_elasticsearch-b_1 bash
+
+Avant de pouvoir le lancer, il convient de préparer un petit peu la configuration, pour cela, on va accèder au fichier de conf `etc/elasticsearch/elasticsearch.yml` avec votre éditeur de texte favori (bien entendu nano).
+
+	nano etc/elasticsearch/elasticsearch.yml
+	
+On va intervenir sur le nom du cluster (qu'on appelera bigdata-paris) ainsi que sur l'adresse d'écoute du serveur pour authoriser les containers à communiquer ensemble.
+
+	...
+	
+	cluster.name: bigdata-paris
+	
+	...
+	
+	network.host: 0.0.0.0
+	
+	...
+	
+Ensuite on lance elasticsearch avec notre commande basée sur `service`
+
+	service elasticsearch start
+	
+On vérifie que le service est lancé
+	
+	service elasticsearch status
+
+A présent, les appels à [http://localhost:9200/_cluster/health](http://localhost:9200/_cluster/health) et à [http://localhost:9200/_cat/shards](http://localhost:9200/_cat/shards) vont nous confirmer la bonne mise en place de ce cluster. Et son passage en statut green. On constate un code en fin de ligne de l'url de récupérations des shards, ce sont les noms des noeuds (configurable). On peut en savoir plus sur ces noeuds en consultant en `GET`l'url [http://localhost:9200/_nodes/process](http://localhost:9200/_nodes/process)
+
+A vous de faire le taff seul pour ajouter le troisième.
+
+A ce moment, vous avez envie d'en savoir plus sur les configuratuons d'un cluster : rendez-vous ici [https://www.elastic.co/guide/en/elasticsearch/reference/current/important-settings.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/important-settings.html)
+
+### Changer sa politique de réplications/shardings
+
+On peut à présent ajoute plus de réplicats, car on a plus de noeuds. Pour ça, on va passer un JSON en `PUT` à l'url suivante [http://localhost:9201/movies/_settings](http://localhost:9201/movies/_settings) 
+
+	{
+	    "index": {
+	        "number_of_replicas" : 2
+	    }
+	}
+
+On constatera que tout reste green, en effet on a 3 serveurs, c'est suffisants pour mettre en place 1 primaires et deux réplicats. Et si on mettait 3.
+
+	{
+	    "index": {
+	        "number_of_replicas" : 3
+	    }
+	}
+	
+Nous voila en état yellow avec des réplicats non assignés.
+
+Essayons maintenant de cahnger notre nombre de shards primaires, avec la même méthode :
+
+	{
+	    "settings": {
+	        "index": {
+	            "number_of_shards" : 6
+	        }
+	    }
+	}
+
+On ne peut pas... En effet, c'est une fonction trop impactante sur le découpage de données. Il faudra le changer sur un nouvel index.
+
+## TP 4, un peu de Kibana
+
+ON va manipuler la base de données movies du TP0, on va donc repartir de docker-elasticsearch et relancer 
+
+	docker-compose up -d
+	
+Si besoin réimporter le fichier `movies_elastic.json` en vous référant à la partie import du TP0.
+
+On accède à Kibana via votre navigateur préféré sur l'adresse [http://localhost:5601](http://localhost:5601)
+
+On va lui indiquer que l'on va travailler sur l'index movies et filtrer sur la données release_date.
+
+![](img-md/kibana-conf.png)
+
+On pourra constater que kiaban a créé son index dans elastic search en consultant l'état des shards (pour rappel : _cat/shards)
+
+Dans management on a la possibilité de configurer des comportement de champs, on peut par exemple y spécifier le fait que image_url soit une url de type image
+
+![](img-md/kibana-conf-url.png)
+
+### Discover
+
+On va pouvoir se refamiliariser ici avec nos datas. Mais on constate qu'il n'y en aucune. Par défaut Kibana va afficher les données des 15 dernières minutes. Dans notre base, aucun film n'est sorti dans les 15 dernières minutes. On va modifier la zone temporelle en haiut à droite de l'interface et partir de 1950.
+
+Dans la requète, on va pouvoir filtrer les données à l'aide du language de requêtage d'elasticSearch documenté ici [https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax)
+
+Par exemple :
+
+* `john`: documents contenant "John" (insensible à la casse) dans un des champs.
+* `fields.actors:"Harrison Ford"`: documents dont le champfields.actorscontient "Harrison Ford".
+* `fields.actors:"Harrison Ford" AND fields.rating:>=8`: documents de la recherche précédente et dont la note est supérieure ou égale à 8.
+* `fields.release_date:[2001 TO 2100]`: films sortis au XXIème siècle.
+* `fields.actors:malkovitch~`: films dont un acteur a un nom ressemblant à "malkovitch".
+
+On peut sauvegarder une recherche avec le bouton save en haut de l'interface. On va garder  en mémoire la recherche des film avec une note de 5 ou moins pour la suite de la manipulation.
+
+### Vizualize
+
+Nous allons voir trois types de graphes, libre à vous de tout découvrir avec la documentation officielle : [https://www.elastic.co/guide/en/kibana/current/createvis.html](https://www.elastic.co/guide/en/kibana/current/createvis.html)
+
+#### Line
+
+On va répondre ici à la question, est-ce que les films récent sont plus ou moins bien noté que les vieux films. 
+
+Pour ça, on va créer vizualization de line type line sur toutes nos données. On arrive sur un point représentant le nombre de film...
+
+On va modifier notre axe Y pour lui faire untiliser la note moyenne
+
+![](img-md/kibana-conf-vizualize-line-avg.png)
+
+On a toujours un point, mais il représente la note moyenne.
+
+Reste à définir nos abscisses, on a ajouter un bucket de type histogramme pour répartir mes années :
+
+![](img-md/kibana-conf-vizualize-line-year.png)
+
+On sauvegarde la courbe pour plus tard
+
+#### Data table
+
+On veut un tableau des réalisateurs qui ont réalisés les pires films (note de 5 ou moins).
+
+On va créer une nouvelle visualisation de type Data table et on va sélectionner notre recherche préalablement enregistré.
+
+On va mettre en place un bickets de type split rows sur lequel on va réaliser un aggrégat au sens d'elastic search. Comme on veut les réalisateurs qui ont fait les pires films, on va prendre comme aggrégats le `terms` `field.realisateur` et on va garder le top 10 des plus prolifiques en mauvais films.
+
+![](img-md/kibana-conf-vizualize-datatable-agg.png)
+
+On sauvegarde notre hall of shame.
+
+#### Vertical bar
+
+On va afficher l'évolution du nombre de film de science fiction à travers le temps par rapport aux sorties annuels. On garde tout l'index car c'est une proportion sur l'ensemable des films qui nous interressent
+
+On va commencer par créer un vertical bar. On va déjà répartir les films par année sur l'axe X. On l'a déjà fait 
+
+![](img-md/kibana-conf-vizualize-vbar-year.png)
+
+On voit que l'on a de plus en plus de film au fil des ans. On va ajouter deux split Series :
+
+* une pour les films de genre sci-fi
+* l'autre pour les films qui ne sont pas de genre sci-fi
+
+![](img-md/kibana-conf-vizualize-vbar-splitseries.png)
+
+On change dans metrics la manière d'afficher le graphe sur l'axe des ordonnées pour afficher un pourcentage. 
+
+![](img-md/kibana-conf-vizualize-vbar-percentage.png)
+
+Et on a un graph parlant.
+
+#### Camembert/PIE
+
+On va afficher un camembert des 10 réalisateurs les plus prolifiques et je voudrais que ce camembert permette de visualiser les genres de prédilection de ces réalisateurs :
+
+On créé PIE un à partir de toutes les donneés de notre base et on va lui ajouter deux split series aggréger en `terms` par réalisateur puis genre limiter aux 10 les plus réprésentés.
+
+![](img-md/kibana-conf-vizualize-pie.png)
+
+Et voilà.
+
+### Dashboard
+
+On peut à présent constituer notre dashboard à partir de nos graphes préconstruits et manipuler leur occupation de l'espace. Vous aurez la possibilité de partager ensuite vos dashboards. Notez bien que Kibana est un outil en frontal de votre base elasticSearch et qu'il n'est pas destiné aux utilisateurs finaux.
+
+## TP 5, exercice Kibana
+
+Pourquoi les notes des films récents sont-elles inférieures à celles des films plus anciens ? Comme on l'a vu dans cette partie sur ElasticSearch, et grâce à notre jeu de données constitué de films, la note moyenne des films baisse d'année en année. Dans cette activité, nous vous proposons d'investiguer ce phénomène.
+
+Vous allez devoir visualiser l'évolution des notes de films avec le temps. Pour cela, vous allez créer un diagramme illustrant la répartition des notes pour chaque décennie.
+
+![](img-md/kibana-exercice.jpeg)
+
+En abscisse seront représentées les décennies, de 1920 à nos jours. Et en ordonnée sera représenté le pourcentage de films dans la gamme de notes données. Par exemple, dans le brouillon ci-dessus (purement fictif), environ 20% des films sortis dans les années 20 ont une note comprise entre 9.5 et 10.
