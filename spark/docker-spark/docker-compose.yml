@@ -1,0 +1,10 @@
+version: "3"
+services:
+  neo4j:
+    image: jupyter/all-spark-notebook
+    ports:
+      - 8888:8888
+      - 4040:4040
+    volumes:
+      - ./data:/home/jovyan/work
+    tty: true
