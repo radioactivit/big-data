@@ -32,3 +32,9 @@ cassandra/share/restaurants/
 
 neo4j/docker-neo4j/plugins/*
 !neo4j/docker-neo4j/plugins/.gitkeep
+
+metastore_db
+spark/docker-spark.1
+spark/docker-spark.2
+*checkpoint*
+*.tex
