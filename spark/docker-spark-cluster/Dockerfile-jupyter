@@ -1,6 +1,6 @@
 FROM jupyter/all-spark-notebook
 USER root
 RUN apt update && apt install nano -y
-RUN apt update && apt install libmysqlclient-dev -y
+RUN apt install libmysqlclient-dev -y
 RUN pip install mysqlclient
-CMD sleep infinity
+USER jovyan

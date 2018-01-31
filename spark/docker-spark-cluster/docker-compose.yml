@@ -1,4 +1,4 @@
-version: "3"
+version: "2"
 services:
   spark-master:
     build: .
@@ -11,7 +11,9 @@ services:
     build: .
     tty: true
   jupyter:
-    image: jupyter/all-spark-notebook
+    build:
+      context: .
+      dockerfile: Dockerfile-jupyter
     ports:
       - 8888:8888
       - 4040:4040
