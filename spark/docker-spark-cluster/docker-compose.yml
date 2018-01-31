@@ -1,0 +1,19 @@
+version: "3"
+services:
+  spark-master:
+    build: .
+    ports:
+      - 8080:8080
+    volumes:
+      - ./data:/home/jovyan/work
+    tty: true
+  spark-worker:
+    build: .
+    tty: true
+  jupyter:
+    image: jupyter/all-spark-notebook
+    ports:
+      - 8888:8888
+      - 4040:4040
+    volumes:
+      - ./data:/home/jovyan/work
