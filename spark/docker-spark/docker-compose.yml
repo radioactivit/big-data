@@ -1,6 +1,6 @@
 version: "3"
 services:
-  neo4j:
+  spark:
     image: jupyter/all-spark-notebook
     ports:
       - 8888:8888
