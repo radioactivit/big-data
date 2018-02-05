@@ -1,0 +1,5 @@
+FROM kibana
+RUN apt update && apt install nano
+RUN echo "server.host: '0.0.0.0'" > /etc/kibana/kibana.yml
+RUN echo "elasticsearch.url: 'http://mathematify.fr:9200'" >> /etc/kibana/kibana.yml
+RUN echo "kibana.index: '.kibana_jerome_k3'" >> /etc/kibana/kibana.yml

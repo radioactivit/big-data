@@ -1,0 +1,3 @@
+FROM kibana
+RUN apt update && apt install nano
+COPY conf/kibana.yml /etc/kibana/kibana.yml

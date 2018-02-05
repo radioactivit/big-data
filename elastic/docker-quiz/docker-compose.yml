@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+  kibana:
+    build: .
+    ports:
+      - 5601:5601
+    tty: true
+  kibana2:
+    build: .
+    volumes:
+      - ./conf:/etc/kibana
+    ports:
+      - 5602:5601
+    tty: true
+  kibana3:
+    build: 
+      context: .
+      dockerfile: DockerfileAvecModificationDirectement
+    ports:
+      - 5603:5601
+    tty: true
+  kibana4:
+    build: 
+      context: .
+      dockerfile: DockerfileAvecModificationDirectementEtCopy
+    ports:
+      - 5604:5601
+    tty: true
