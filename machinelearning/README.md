@@ -22,7 +22,7 @@ test.csv va nous servir à vérifier nos propositions !
 
 ## Pour de vrai
 
-### Trouver un moyen pour lancer un container avec jupyer, numpy, pandas et spark d'installé. Si vous avez encore l'image jupyter/all-spark-notebook, c'est une bonne idée. On aura besoin d'importer des fichiers donc on pourra soit partager des volumes, soit utiliser les fonctions d'upload de Jupyter
+### Trouver un moyen pour lancer un container avec jupyter, numpy, pandas et spark d'installé. Si vous avez encore l'image jupyter/all-spark-notebook, c'est une bonne idée. On aura besoin d'importer des fichiers donc on pourra soit partager des volumes, soit utiliser les fonctions d'upload de Jupyter
 
 ### Utiliser pandas pour lire le fichier train.csv et read.csv dans deux variables différentes python pandas (dataframes) différentes.
 
