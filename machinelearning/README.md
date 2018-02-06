@@ -19,3 +19,11 @@ test.csv va nous servir à vérifier nos propositions !
 6. Tester sur 70% du fichier train.csv et vérifier la pertinence sur les 30% restants
 7. Appliquer la fonction au fichier test.csv
 8. Chercher à améliorer la UDF en l'appelant en faisant intervenir deux paramètres et en appelant la nouvelle UDF survivor2 (on veut garder la première, on veut plusieurs étapes successives !)
+
+## Pour de vrai
+
+### Trouver un moyen pour lancer un container avec jupyer, numpy, pandas et spark d'installé. Si vous avez encore l'image jupyter/all-spark-notebook, c'est une bonne idée. On aura besoin d'importer des fichiers donc on pourra soit partager des volumes, soit utiliser les fonctions d'upload de Jupyter
+
+### Utiliser pandas pour lire le fichier train.csv et read.csv dans deux variables différentes python pandas (dataframes) différentes.
+
+### Comment avoir les différentes colonnes de vos pandas dataframe ? Jouer avec l'API de pandas sur vos données. On pourra notamment utiliser une cheat sheet.
