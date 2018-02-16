@@ -1,12 +1,13 @@
 # IoT
 La partie IoT de la formation
 
-Modifier le fichier docker-compose.yml du dossier docker-iot pour y mettre 3 services. Ces services devront s'appeler :
+Modifier le fichier docker-compose.yml du dossier docker-iot pour y mettre 5 services. Ces services devront s'appeler :
 
     sigfox-iot-simulator
     sigfox-cloud
     custom-server
     customer-server-node
+    mqtt-server
 
 `sigfox-iot-simulator` doit être basé sur l'image appelé frelonquai/sigfox-iot-simulator
 `sigfox-cloud` doit être basé sur jupyter/all-spark-notebook (Juste parce qu'on l'a tous mais la seule chose qui nous intéresse est Python3)
