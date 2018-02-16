@@ -53,7 +53,7 @@ data: {3}`;
     let result = pattern.format(device["name"],Math.floor(Date.now() / 1000),randomIntBetween1And(1000000),device.generator());
     console.log(result);
     try{
-      let response = await got.post(url,{body:JSON.stringify({"data":"new"})});
+      let response = await got.post(url,{body:result});
       console.log("Successfully joined",url);
     }catch(error){
       console.log("Unable to join",url);
@@ -62,4 +62,13 @@ data: {3}`;
   },1000);
 };
 
-repeat();
+let multiplierEnv = process.env.multiplier;
+
+let multiplier = multiplierEnv && !isNaN(multiplierEnv) && multiplierEnv > 1 ? parseInt(process.env.multiplier) : 1;
+console.log("Multiplier",multiplier);
+
+for(i=0;i <= multiplier;i++){
+  setTimeout(() => {
+    repeat();
+  },100 * i);
+}

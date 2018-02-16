@@ -1,1 +1,54 @@
-#...
+version: "3"
+services:
+  sigfox-iot-simulator:
+    image: frelonquai/sigfox-iot-simulator
+    tty: true
+    environment:
+      multiplier: 3
+  sigfox-cloud:
+    build: 
+      context: .
+      dockerfile: Dockerfile-sigfox-cloud
+    ports:
+      - 80:80
+    environment:
+      FLASK_APP: myServer.py
+    volumes:
+      - ./:/data
+    tty: true
+  custom-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile-sigfox-cloud
+    environment:
+      FLASK_APP: myCustomServer.py
+    ports:
+      - 81:80
+    volumes:
+      - ./:/data
+    tty: true
+  mqtt-server:
+    image: eclipse-mosquitto
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./:/data
+    tty: true
+  mqtt-listener-elastic-inserter:
+    build: 
+      context: .
+      dockerfile: Dockerfile-sigfox-cloud
+    command: sleep infinity
+    volumes:
+      - ./:/data
+    tty: true
+  elasticsearch:
+    image: elasticsearch
+    ports:
+      - 9200:9200
+    tty: true
+  kibana:
+    image: kibana
+    ports:
+      - 5601:5601

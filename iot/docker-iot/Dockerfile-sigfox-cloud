@@ -1,0 +1,8 @@
+FROM jupyter/all-spark-notebook
+USER root
+RUN pip install Flask
+RUN pip install requests
+RUN pip install paho-mqtt
+ENTRYPOINT []
+WORKDIR /data
+CMD flask run --port 80 --host 0.0.0.0
