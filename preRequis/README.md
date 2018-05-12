@@ -79,11 +79,17 @@ Ici il va falloir que chacun adapate sa méthode à son matériel. En effet, l'i
 	docker run -it ubuntu:16.04 bash
 	cat /etc/issue
 	
-#### Docker-compose
+### Docker-compose
 
 Pour manipuler docker compose et docker, nous allons tenter d'installer ensemble gitlab sur notre machine. On va partir des informations présentées sur ce repo : [https://github.com/sameersbn/docker-gitlab](https://github.com/sameersbn/docker-gitlab)
 
 Le fichier docker-compose.yml est également présent dans le dossier docker de ce repo, il a de plus était modifié et a été testé pour fonctionné sur OSX.
+
+### Exercice
+
+Avant d'attaquer le coté UNIX, je vous prospose avec l'aide de google, en se servant du docker hub et de ce que nous venons de voir de faire tourner une boutique prestashop en local sur nos machines avec Docker. 
+
+A vous de jouer.
 
 ## Console/Shell/Linux
 
