@@ -50,7 +50,7 @@ C'est l'outil qui va manager les containers.
 
 #### Docker clients
 
-Ce sont les commandes sde controle des containers.
+Ce sont les commandes de controle des containers.
 
 #### Docker registry
 
@@ -322,7 +322,7 @@ Pour lister tous les containers disponibles
 	
 	docker ps -a
 
-#### Lancer un container décrite par un fichier docker-compose.yml
+#### Lancer une collection de containers décrite par un fichier docker-compose.yml
 
 	docker-compose up
 	docker-compose up -d
@@ -356,3 +356,47 @@ Pour lister tous les containers disponibles
 * https://community.embarcadero.com/article/articles-database/1076-top-3-sample-databases-for-postgresql
 * https://hackernoon.com/how-to-query-jsonb-beginner-sheet-cheat-4da3aa5082a3
 * https://blog.codeship.com/unleash-the-power-of-storing-json-in-postgres/
+
+### MySQL
+
+cf. le dossier mysql
+
+### PgSQL
+
+cf. le dossier pgsql
+
+# Le NoSQL (en route vers la big data)
+
+## Pourquoi
+
+Contrainte d’écriture. Contrainte de lecture. Enjeu de performance. 
+
+Limitation du SQL et du modèle ACID
+
+Explication d’ACID et de la définition d’une base relationnelle. 
+
+## Présentation du modèle Base.
+
+
+
+## Les types de bases NoSQL
+
+## Explication du triangle d’ACE. 
+
+## Les limitations
+
+## Le Sharding
+
+## Le cloud
+
+# Manipulation de BDD NoSQL
+
+## Couchbase
+
+## CouchDB
+
+## InfluxDB
+
+## REDIS
+
+## RabbitMQ
