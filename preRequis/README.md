@@ -367,36 +367,125 @@ cf. le dossier pgsql
 
 # Le NoSQL (en route vers la big data)
 
+Un très bon cours sur Open Classroom : [https://openclassrooms.com/courses/maitrisez-les-bases-de-donnees-nosql]()
+
 ## Pourquoi
 
 Contrainte d’écriture. Contrainte de lecture. Enjeu de performance. 
 
-Limitation du SQL et du modèle ACID
+### Limitation du SQL et du modèle ACID
 
-Explication d’ACID et de la définition d’une base relationnelle. 
+ACID thanks to wikipedia : [https://en.wikipedia.org/wiki/ACID]()
 
-## Présentation du modèle Base.
+![](img-md/ACID_BASE.png)
+
+#### Atomicity
+
+Atomicity requires that each transaction be "all or nothing": if one part of the transaction fails, then the entire transaction fails, and the database state is left unchanged. An atomic system must guarantee atomicity in each and every situation, including power failures, errors and crashes. To the outside world, a committed transaction appears (by its effects on the database) to be indivisible ("atomic"), and an aborted transaction does not happen.
+
+#### Consistency
+
+The consistency property ensures that any transaction will bring the database from one valid state to another. Any data written to the database must be valid according to all defined rules, including constraints, cascades, triggers, and any combination thereof. This does not guarantee correctness of the transaction in all ways the application programmer might have wanted (that is the responsibility of application-level code), but merely that any programming errors cannot result in the violation of any defined rules.
+
+#### Isolation
+
+The isolation property ensures that the concurrent execution of transactions results in a system state that would be obtained if transactions were executed sequentially, i.e., one after the other. Providing isolation is the main goal of concurrency control. Depending on the concurrency control method (i.e., if it uses strict – as opposed to relaxed – serializability), the effects of an incomplete transaction might not even be visible to another transaction.
+
+#### Durability
+
+The durability property ensures that once a transaction has been committed, it will remain so, even in the event of power loss, crashes, or errors. In a relational database, for instance, once a group of SQL statements execute, the results need to be stored permanently (even if the database crashes immediately thereafter). To defend against power loss, transactions (or their effects) must be recorded in a non-volatile memory.
+
+### Un base relationnel c'est quoi ?
+
+La structure ? Les contraintes ? L'algèbre relationnel.
 
 
+## Présentation du modèle BASE
+
+![](img-md/ACID_BASE.png)
 
 ## Les types de bases NoSQL
 
-## Explication du triangle d’ACE. 
+### Colonne
+
+![](img-md/colonnes.png)
+
+### Clef Valeur
+
+![](img-md/clefValeur.png)
+
+### Document
+
+![](img-md/document.png)
+
+### Graphes
+
+![](img-md/graphes.png)
+
+### Time series
+
+### Queues
+
+## Explication du triangle d’ACE.
+
+![](img-md/illustrationCAP.png)
+
+![](img-md/CAP.png)
 
 ## Les limitations
 
-## Le Sharding
+Liés au théorème de CAP, quelles sont-elles ?
+
+## Repartir les datas / Le sharding
+
+### HDFS
+
+![](img-md/shardingHDFS.png)
+
+### Btree
+
+![](img-md/shardingBTree.png)
+
+### Table de hachage distribuée
+
+![](img-md/shardingDHT.png)
 
 ## Le cloud
+
+Durant la formation nous allons voir pleins de technologies. De tout types et pour addresser de nombreux besoins mais un des accès les plus simples au monde du Big Data est le cloud.
+
+### Exercice en communauté
+
+Proposer dans le slack un lien vers une offre en mode cloud pour
+
+1. Une base documentaire
+2. Une base clef valeur
+3. Un gestionnaire de queues
+4. Une time series
+5. Une base graphe
+6. Une base relationnelle
+7. Un autre type de base
 
 # Manipulation de BDD NoSQL
 
 ## Couchbase
 
+[https://docs.docker.com/samples/library/couchbase/]()
+
+[https://developer.couchbase.com/documentation/server/4.0/sdks/node-2.0/quick-start.html]()
+
 ## CouchDB
+
+[https://docs.docker.com/samples/library/couchdb/]()
+
+[http://guide.couchdb.org/draft/tour.html]()
 
 ## InfluxDB
 
 ## REDIS
+
+[https://docs.docker.com/samples/library/redis/#start-a-redis-instance]()
+
+[https://redis.io/topics/quickstart]()
 
 ## RabbitMQ
