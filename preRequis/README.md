@@ -2,6 +2,18 @@
 
 Un certain nombre de concepts sont nécessaires pour aborder une formation tel que la formation Big-Data. En effet, le Big-Data n'a pas été le premier enjeu de l'informatique, loin s'en faut. Ci-après les pré-requis necessaire pour bien apprécier le reste de la formation.
 
+## Qui sommes-nous ?
+
+Qui suis-je? Et qui sommes-t'on?
+
+## Slack
+
+Notre outil de collaboration, on va tous le rejoindre.
+
+## Quizz
+
+RDV sur [http://socrative.com]()
+
 ## GIT
 
 Ce fichier est versionné sur un repo github publique. Si vous arrivez à le lire c'est que vous êtes déjà en contact avec GIT.
@@ -282,6 +294,15 @@ Rechercher des fichiers `locate`, `find`, `grep`
 	grep alias .bashrc
 	grep -i alias .bashrc
 	grep -ni alias .bashrc
+	
+### Le réseau
+
+	ping
+	traceroute
+	ifconfig
+	nano /etc/hosts
+	telnet
+	whois
 
 ### Nano
 
@@ -329,6 +350,21 @@ Pour lister tous les containers disponibles
 	docker-compose up -d --build
 
 	docker-compose down
+	
+### Exercice
+
+Dans votre dossier utilisateur :
+
+1. Créé un dossier exercice
+2. Naviguer dans ce dossier
+3. Créer un fichier samuelIsAPoet.txt
+4. Ajouter le contenu d'un texte que vous trouverez sur slipsum.com dans le fichier
+5. Trouver la taille de ce fichier
+6. Créer un lien symbolique de samuelIsAPoet.txt, appelez le comme vous le souhaitez
+7. Supprimer le fichier samuelIsAPoet.txt (qu'est-il arriver à notre lien symbolique?)
+8. Mesurer le temps de réponse entre les DNS de google et de cloudflare. Lesquels sont les plus rapides?
+9. Installer le paquet https://doc.ubuntu-fr.org/caca-utils. Récupérer une image de votre choix avec wget et laisser la magie se produire.
+10. BONUS : mettre en place un serveur web de votre choix et bricoler le hosts de la machine virtuelle et le vhost du serveur web pour que la commande lynx http://www.google.com affiche une citation de la série Kaamelott de votre choix.
 
 ## Re GIT
 
@@ -341,6 +377,20 @@ Pour lister tous les containers disponibles
 	git branche notreBranche
 	git checkout noreBranche
 
+### Exercice
+
+1. Créer un repo sur github.com appelé exerciceBigData
+2. cloner ce repo
+2. Ajouter un fichier de votre choix
+3. Commiter avec un message décrivant l'action que vous venez d'effectuer
+4. Ajouter un second fichier
+3. Commiter avec un message décrivant l'action que vous venez d'effectuer
+6. Supprimer le premier fichier
+7. Afficher l'état du repo local en comparaison avec le serveur github
+8. Envoyer les modifs au serveur github
+9. Créer une branche, ajouter un nouveau fichier, commiter et pusher avec Github
+10. Facultatif: supprimer votre repo
+
 ## JSON
 
 * https://la-cascade.io/json-pour-les-debutants/ 
@@ -349,6 +399,12 @@ Pour lister tous les containers disponibles
 ## REGEX
 
  * https://www.lucaswillems.com/fr/articles/25/tutoriel-pour-maitriser-les-expressions-regulieres
+
+### Exercice
+
+1. Ecrire une regex qui valide les numéros FR au format international comme suit +33(0)1-22-33-44-55
+2. Ecrire une regex qui vérifie qu'un chemin de fichier est correct depuis la racine linux et possède une extension entre 2 et 4 caractères (/usr/RAIT/test-fichier.txt)
+3. Ecrire une regex qui va changer 
 
 ## SQL
 
@@ -482,6 +538,12 @@ Proposer dans le slack un lien vers une offre en mode cloud pour
 
 ## InfluxDB
 
+[https://hub.docker.com/_/influxdb/]()
+
+[https://blog.laputa.io/try-influxdb-and-grafana-by-docker-6b4d50c6a446]()
+
+[https://github.com/kamon-io/docker-grafana-influxdb]()
+
 ## REDIS
 
 [https://docs.docker.com/samples/library/redis/#start-a-redis-instance]()
@@ -489,3 +551,9 @@ Proposer dans le slack un lien vers une offre en mode cloud pour
 [https://redis.io/topics/quickstart]()
 
 ## RabbitMQ
+
+[https://hub.docker.com/_/rabbitmq/]()
+
+[https://github.com/mikeyyuen/python-rabbitmq-docker]()
+
+[https://www.rabbitmq.com/tutorials/tutorial-one-python.html]()
