@@ -1,0 +1,30 @@
+version: "2"
+
+services:
+  namenode:
+    build: .
+    container_name: namenode
+    ports:
+      - 50070:50070
+
+  namenodeb:
+    build: .
+    container_name: namenodeb
+  
+  datanode1:
+    build: .
+    container_name: datanode1
+    depends_on:
+      - namenode
+  
+  datanode2:
+    build: .
+    container_name: datanode2
+    depends_on:
+      - namenode
+  
+  datanode3:
+    build: .
+    container_name: datanode3
+    depends_on:
+      - namenode

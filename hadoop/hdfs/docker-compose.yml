@@ -1,0 +1,7 @@
+version: '2'
+services:
+  python:
+    build: python/.
+  hadoop:
+    image: sequenceiq/hadoop-docker:2.7.1
+    
