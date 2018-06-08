@@ -1,0 +1,7 @@
+version: "2"
+
+services:
+  python:
+    build: python/.
+    volumes:
+      - ./script:/root/script    

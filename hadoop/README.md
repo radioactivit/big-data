@@ -457,6 +457,192 @@ Dans l'ordre, il est attendu que vous écriviez :
 
 RDV dans le dossier docker-hadoop-cluster
 
+## Cas d'usage sur WRAP10
+
+[https://helloexoworld.github.io/hew-hands-on/]()
+
 ## Pratique du Map/Reduce
 
-## Cas d'usage sur WRAP10
+![](img-md/mapReduce.png)
+
+![](img-md/mapReduceInfraHadoop.png)
+
+![](img-md/mapReduceInfraHadoopV1.png)
+
+### WordCount
+
+On lance le docker dans le dossier docker-hadoop et on se rend en bash sur le namenode.
+
+on va travailler dans le dossier wordCountJava dans le repertoire user.
+
+NB. : nano et wget ne sont pas installés, mais tout le monde sait le faire. ;-)
+
+
+Dans le fichier `WordCountMapper.java` :
+
+	package rait.bigdata.wordcount;
+	
+	import java.io.IOException;
+	import java.util.StringTokenizer;
+	import org.apache.hadoop.io.IntWritable;
+	import org.apache.hadoop.io.LongWritable;
+	import org.apache.hadoop.io.Text;
+	import org.apache.hadoop.mapreduce.Mapper;
+	
+	public class WordCountMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+	
+	    private final static IntWritable one = new IntWritable(1);
+	    private Text word = new Text();
+	
+	    @Override
+	    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+	        String line = value.toString();
+	
+	        StringTokenizer tokenizer = new StringTokenizer(line);
+	        while (tokenizer.hasMoreTokens()) {
+	            word.set(tokenizer.nextToken());
+	            context.write(word, one);
+	        }
+	    }
+	
+	    public void run(Context context) throws IOException, InterruptedException {
+	        setup(context);
+	        while (context.nextKeyValue()) {
+	            map(context.getCurrentKey(), context.getCurrentValue(), context);
+	        }
+	        cleanup(context);
+	    }
+	
+	}
+
+Dans le fichier `WordCountReducer.java` :
+
+	package rait.bigdata.wordcount;
+	
+	import java.io.IOException;
+	import java.util.Iterator;
+	
+	import org.apache.hadoop.io.IntWritable;
+	import org.apache.hadoop.io.Text;
+	import org.apache.hadoop.mapreduce.Reducer;
+	
+	public class WordCountReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+	
+	    private IntWritable totalWordCount = new IntWritable();
+	
+	    @Override
+	    public void reduce(final Text key, final Iterable<IntWritable> values,
+	            final Context context) throws IOException, InterruptedException {
+	
+	        int sum = 0;
+	        Iterator<IntWritable> iterator = values.iterator();
+	
+	        while (iterator.hasNext()) {
+	            sum += iterator.next().get();
+	        }
+	
+	        totalWordCount.set(sum);
+	        // context.write(key, new IntWritable(sum));
+	        context.write(key, totalWordCount);
+	    }
+	}
+	
+Dans le fichier `WordCountDriver.java` :
+
+	package rait.bigdata.wordcount;
+	
+	import org.apache.hadoop.conf.Configuration;
+	import org.apache.hadoop.conf.Configured;
+	import org.apache.hadoop.fs.FileSystem;
+	import org.apache.hadoop.fs.Path;
+	import org.apache.hadoop.io.IntWritable;
+	import org.apache.hadoop.io.Text;
+	import org.apache.hadoop.mapreduce.Job;
+	import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+	import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+	import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+	import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+	import org.apache.hadoop.util.GenericOptionsParser;
+	import org.apache.hadoop.util.Tool;
+	import org.apache.hadoop.util.ToolRunner;
+	
+	public class WordCountDriver extends Configured implements Tool {
+	    public int run(String[] args) throws Exception {
+	        if (args.length != 2) {
+	            System.out.println("Usage: [input] [output]");
+	            System.exit(-1);
+	        }
+	        // Creation d'un job en lui fournissant la configuration et une description textuelle de la tache
+	        Job job = Job.getInstance(getConf());
+	        job.setJobName("wordcount");
+	
+	        // On precise les classes MyProgram, Map et Reduce
+	        job.setJarByClass(WordCountDriver.class);
+	        job.setMapperClass(WordCountMapper.class);
+	        job.setReducerClass(WordCountReducer.class);
+	
+	        // Definition des types cle/valeur de notre probleme
+	        job.setOutputKeyClass(Text.class);
+	        job.setOutputValueClass(IntWritable.class);
+	
+	        job.setInputFormatClass(TextInputFormat.class);
+	        job.setOutputFormatClass(TextOutputFormat.class);
+	
+	        Path inputFilePath = new Path(args[0]);
+	        Path outputFilePath = new Path(args[1]);
+	
+	        // On accepte une entree recursive
+	        FileInputFormat.setInputDirRecursive(job, true);
+	
+	        FileInputFormat.addInputPath(job, inputFilePath);
+	        FileOutputFormat.setOutputPath(job, outputFilePath);
+	
+	        FileSystem fs = FileSystem.newInstance(getConf());
+	
+	        if (fs.exists(outputFilePath)) {
+	            fs.delete(outputFilePath, true);
+	        }
+	
+	        return job.waitForCompletion(true) ? 0: 1;
+	    }
+	
+	    public static void main(String[] args) throws Exception {
+	        WordCountDriver wordcountDriver = new WordCountDriver();
+	        int res = ToolRunner.run(wordcountDriver, args);
+	        System.exit(res);
+	    }
+	}
+	
+On va compiler notre java 
+
+	which hadoop
+	export HADOOP_HOME=/opt/hadoop-2.7.1
+	export HADOOP_CLASSPATH=$($HADOOP_HOME/bin/hadoop classpath)
+	javac -classpath $HADOOP_CLASSPATH WordCount*.java
+	
+On créer le jar :
+
+	mkdir -p rait/bigdata/wordcount
+	mv *.class rait/bigdata/wordcount
+	jar -cvf rait_bigdata_wordcount.jar -C . rait
+
+On va ajouter dans HDFS le fichier qu'on va traiter :
+
+	wget http://www.textfiles.com/ufo/airspace.txt
+	hdfs dfs -mkdir /input
+	hdfs dfs -copyFromLocal airspace.txt /input
+
+On éxécute ensuite avec 
+
+	hadoop jar rait_bigdata_wordcount.jar rait.bigdata.wordcount.WordCountDriver /input/airspace.txt /results
+	
+Le résultat est aussi stocké dans HDFS.
+
+	hdfs dfs -ls /results
+	hdfs dfs -cat /results/part-r-00000
+
+### Wordcount Python
+
+
+
+Exemple wordcount avec HDFS: https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html
