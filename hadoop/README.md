@@ -14,7 +14,7 @@ TODO: Réécrire cette partie
 
 Commençons par définir ce dont nous avons besoin : nous allons stocker une grande quantité de données dans un dépôt qui va être la source d'information principale, voire unique, d'un certain nombre d'applications. Dans le jargon du Big Data, un tel dépôt est appelé un Data Lake.
 
-![](img-md/datalake.png)
+![img-md/datalake.png](img-md/datalake.png)
 
 De l'autre côté, comment se comporteront les applications qui utilisent le master dataset ? On peut imaginer qu'elles vont lire les données au fur et à mesure qu'elles leurs parviennent, sans chercher à revenir en arrière aléatoirement. Autrement dit : les applications vont réaliser des opérations de lecture séquentielles. Par exemple, pour calculer le nombre moyen d'inscriptions par jour, une application va lire toutes les données d'une même journée dans l'ordre. Elle ne va pas avoir besoin de faire des opérations de lecture en accès aléatoire dans le master dataset.
 
@@ -463,11 +463,11 @@ RDV dans le dossier docker-hadoop-cluster
 
 ## Pratique du Map/Reduce
 
-![](img-md/mapReduce.png)
+![img-md/mapReduce.png](img-md/mapReduce.png)
 
-![](img-md/mapReduceInfraHadoop.png)
+![img-md/mapReduceInfraHadoop.png](img-md/mapReduceInfraHadoop.png)
 
-![](img-md/mapReduceInfraHadoopV1.png)
+![img-md/mapReduceInfraHadoopV1.png](img-md/mapReduceInfraHadoopV1.png)
 
 ### WordCount
 
@@ -643,6 +643,175 @@ Le résultat est aussi stocké dans HDFS.
 
 ### Wordcount Python
 
+Et la même chose en python ??
 
+#### Hadoop streaming
 
-Exemple wordcount avec HDFS: https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html
+Java n'est pas du tout votre langage préféré et vous vous dites que, pour déployer votre algorithme MapReduce sur Hadoop vous n'allez pas pouvoir y échapper ? Et bien, bonne nouvelle, il y a Hadoop Streaming. C'est un outil distribué avec Hadoop qui permet l'exécution d'un programme écrit dans d'autres langages, comme par exemple Python, C, C++...
+
+En fait, Hadoop Streaming est un.jar qui prend en arguments :
+
+des programmes ou scripts définissant les tâches MAP et REDUCE (dans n'importe quel langage),
+
+les fichiers d'entrée et le répertoire de sortie HDFS.
+
+##### Hadoop Streaming - MAP
+
+Pour écrire un programme MAP pour Hadoop mais dans un autre langage, il faut que les données d'entrée soient lues sur l'entrée standard (stdin) et les données de sorties doivent être envoyées sur la sortie standard (stdout). On écrira donc notre série de paires(clé, valeur), chaque paire sur une ligne différente, au format :
+
+	Clé[TABULATION]Valeur
+
+##### Hadoop Streaming - REDUCE
+
+Le même mécanisme doit être mis en place pour le programme REDUCE. Nous avons en entrée et en sortie du programme une série de lignes au format
+
+	Clé[TABULATION]Valeur
+	
+##### Exécution
+
+Une fois écrits vos programmes MAP et REDUCE avec votre langage préféré, il suffit alors d'exécuter votre application de la manière suivante :
+
+	hadoop jar hadoop-streaming.jar -input [fichier entree HDFS] \
+	                                  -output [fichier sortie HDFS] \
+	                                  -mapper [programme MAP] \
+	                                  -reducer [programme REDUCE]
+
+#### Allons-y !!
+
+On se créé un nouveau repertoire pour l'occasion à la racine de notre compte utilisateur. Appelons le wcPython.
+
+Dans ce repertoire, on créé `WordCountMapper.py`
+
+	#! /usr/bin/env python3
+	import sys
+	
+	for line in sys.stdin:
+	    # Supprimer les espaces
+	    line = line.strip()
+	    # recupérer les mots
+	    words = line.split()
+	
+	    # operation map, pour chaque mot, generer la paire (mot, 1)
+	    for word in words:
+	        print("%s\t%d" % (word, 1))
+
+Puis `WordCountReducer.py` :
+
+	#! /usr/bin/env python3
+
+	import sys
+	total = 0
+	lastword = None
+	
+	for line in sys.stdin:
+	    line = line.strip()
+	
+	    # recuperer la cle et la valeur et conversion de la valeur en int
+	    word, count = line.split()
+	    count = int(count)
+	
+	    # passage au mot suivant (plusieurs cles possibles pour une même exécution de programme)
+	    if lastword is None:
+	        lastword = word
+	    if word == lastword:
+	        total += count
+	    else:
+	        print("%s\t%d occurences" % (lastword, total))
+	        total = count
+	        lastword = word
+	        
+	if lastword is not None:
+	    print("%s\t%d occurences" % (lastword, total))
+
+On peut executer ensuite la fonction mapReduce avec la commande 
+	
+	hadoop jar /opt/hadoop-2.7.1/share/hadoop/tools/lib/hadoop-streaming-2.7.1.ja -input /input/airspace.txt -output /resultsPyhton -mapper ./WordCountMapper.py -reducer ./WordCountReducer.py
+
+[https://bitbucket.org/uhopper/hadoop-docker](https://bitbucket.org/uhopper/hadoop-docker)
+
+### Les exemples Hadoop
+
+[https://github.com/apache/hadoop/tree/trunk/hadoop-mapreduce-project/hadoop-mapreduce-examples/src](https://github.com/apache/hadoop/tree/trunk/hadoop-mapreduce-project/hadoop-mapreduce-examples/src)
+
+Exemple wordcount avec HDFS (à sauter): [https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html](https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html)
+
+Exercice plus original (à faire) :
+[https://www.guru99.com/create-your-first-hadoop-program.html](https://www.guru99.com/create-your-first-hadoop-program.html)
+
+### Hadoop Map Reduce Exercice à faire
+
+La première étape est donc de récupérer ces deux documents (http://www.textfiles.com/etext/FICTION/defoe-robinson-103.txt et http://www.textfiles.com/etext/FICTION/callwild) et de les stocker dans HDFS dans un repertoire `/exercice/input`. 
+
+#### TF-IDF
+
+Si vous n'avez jamais entendu parler de la pondération TF-IDF, alors je vous invite à lire la page Wikipedia qui la présente. Dans cette activité, nous prendrons la formule suivante :
+
+	w_t,d = (tf_t,d / n_d) × log(N/df_t)
+
+avec :
+
+tf_t,d qui représente la fréquence d'un mot t dans un document d. Tiens... cela ne vous rappelle rien ?
+n_d qui représente le nombre de mots dans un document d (on pourra l'appeler WordPerDoc).
+df_t qui représente la fréquence du terme dans la collection, soit le nombre de documents dans lequel le mot t est présent (dans notre cas, ce sera 1 ou 2).
+Enfin N est le nombre de documents dans notre collection, soit ici 2.
+Pour répondre à ce problème en MapReduce, l'approche la plus simple est de décomposer le calcul en 3 tâches :
+
+**1-** Le calcul du nombre d'occurrences des mots dans un document, soit WordCount ! On prendra comme clé pour MAP et REDUCE la paire (mot, doc_ID) où doc_ID est l'identifiant du document. Pour réduire le travail des nœuds REDUCE, la suite de traitements suivante sera appliquée :
+
+* Mise en minuscule.
+* Filtrage des mots inutiles à l'aide de cette liste de stop words.
+* Suppression des ponctuations et des caractères numériques (par exemple à l'aide d'expressions régulières).
+* Suppression des mots de moins de 3 caractères.
+
+**2-** Le calcul du nombre total de mots dans chaque document que nous appellerons WordPerDoc. Pour cette tâche, l'entrée sera donc la sortie de la tâche précédente. On doit avoir en sortie de cette tâche un ensemble de paires ((mot, doc_ID), (wordcount, wordperdoc)).
+
+**3-** Enfin, la dernière tâche est finalement le calcul du TF-IDF lui-même. Elle prend en entrée la sortie de la tâche 2 et nous aurons en sortie un ensemble de paires ((mot, doc_ID), TF-IDF)
+
+### Hadoop temps réel
+
+#### Un cas
+
+Nous sommes Youhou et on un site web
+
+![img-md/youhouhou_appli-web-simple.jpeg](img-md/youhouhou_appli-web-simple.jpeg)
+
+Le site web augment son traffic et on veut ajouter une fonctionnalité de log et d'alerting mail. Ca devient potentiellement long :
+
+![img-md/youhouhou_appli-web-complex.jpeg](img-md/youhouhou_appli-web-complex.jpeg)
+
+![img-md/youhouhou_appli-web-error.jpeg](img-md/youhouhou_appli-web-error.jpeg)
+
+#### La solution
+
+On va mettre en place un système de queue
+
+![img-md/youhouhou_appli-web-realtime.jpeg](img-md/youhouhou_appli-web-realtime.jpeg)
+
+On va utiliser Apache KAFKA et Apache Storm (les deux font partie des distribs HortonWorks).
+
+#### Un autre cas, agrégation de logs
+
+Un problème qui émerge systématiquement dans les applications distribuées est celui de l'agrégation des logs. Une application distribuée sur plusieurs serveurs génère des logs sur chacun de ces serveurs : cela signifie que pour déboguer une application distribuée, il faut examiner les logs présents sur chacun des serveurs indépendamment. Ceci peut rendre le débogage très compliqué, voire impossible à partir de plusieurs dizaines de serveurs. C'est typiquement ce qui peut se produire dans une application web dont les différents serveurs sont accessibles derrière un répartiteur de charge ("load balancer").
+
+Pour résoudre ce problème, la première étape consiste à agréger les logs sur un seul serveur. Il existe différents outils pour réaliser cela, mais on peut tout à fait envisager de les remplacer par une file d'attente de messages. L'avantage, c'est qu'une telle file permet non seulement d'agréger des logs, mais également de les transmettre à un système de traitement de flux pour analyse. Une application classique est la détection des erreurs et l'envoi d'alertes : lorsqu'une exception est levée dans une application, la stacktrace de l'erreur est transmise par e-mail à l'équipe technique.
+
+![img-md/example_log-management.jpeg](img-md/example_log-management.jpeg)
+
+#### Un dernier cas, déclenchement de tâches asynchrones
+
+Certaines tâches ne doivent pas être réalisées de manière synchrone : soit parce qu'elles ne concernent pas l'utilisateur, soit parce qu'il faudrait faire patienter l'utilisateur trop longtemps avant qu'elles ne finissent de s'exécuter. C'est ce que nous avons vu dans le chapitre précédent avec l'envoi d'e-mails. Une fois qu'une file de messages et un système de traitement de flux ont été mis en place, il est possible d'exécuter un grand nombre de tâches en parallèle qui permettront d'extraire énormément de valeur des données générées sans affecter les performances de l'application principale. C'est par exemple ce qui est fait dans les plateformes d'hébergement de vidéos qui doivent mettre en place des tâches de transcodage des fichiers uploadés par les utilisateurs pour obtenir des vidéos en différentes résolutions.
+
+![img-md/example_video-processing.jpeg](img-md/example_video-processing.jpeg)
+
+Dans ce schéma, les utilisateurs réalisent des requêtes périodiques sur le serveur pour obtenir des informations sur la progression du transcodage. Notez le rôle prépondérant de la base de données qui permet au serveur frontal de communiquer avec le système de traitement des données. Cette communication se fait de manière indirecte, puisque le traitement des données se fait dans un process séparé de celui du serveur.
+
+#### Apache KAFKA
+
+Kafka est bien plus qu'une file de messages et peut être utilisé comme une plateforme complète d'échanges de données. En pratique, cela signifie que Kafka peut agir comme une plateforme distribuée qui centralise tous les messages qui transitent entre différentes applications. Documentation officielle : [https://kafka.apache.org/documentation/](https://kafka.apache.org/documentation/)
+
+On va utiliser une image docker de Kafka proposer par Spotify.
+
+	docker pull spotify/kafka
+	docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=`docker-machine ip \`docker-machine active\`` --env ADVERTISED_PORT=9092 spotify/kafka
+	
+	https://developer.jcdecaux.com
