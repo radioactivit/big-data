@@ -12,6 +12,7 @@ services:
       - ./hadoop.env
     ports:
       - 50070:50070
+      - 8080:8080
   
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:1.1.0-hadoop2.7.1-java8
