@@ -731,7 +731,16 @@ On peut executer ensuite la fonction mapReduce avec la commande
 
 ### Les exemples Hadoop
 
+
+
 [https://github.com/apache/hadoop/tree/trunk/hadoop-mapreduce-project/hadoop-mapreduce-examples/src](https://github.com/apache/hadoop/tree/trunk/hadoop-mapreduce-project/hadoop-mapreduce-examples/src)
+
+Chacun en prend un, et explique sur Slack :
+
+1. Le but de la fonction
+2. Les couple clef => valeur retenus
+3. La fonction map
+4. La fonction Reduce
 
 Exemple wordcount avec HDFS (à sauter): [https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html](https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html)
 
@@ -767,7 +776,9 @@ Pour répondre à ce problème en MapReduce, l'approche la plus simple est de d�
 
 **3-** Enfin, la dernière tâche est finalement le calcul du TF-IDF lui-même. Elle prend en entrée la sortie de la tâche 2 et nous aurons en sortie un ensemble de paires ((mot, doc_ID), TF-IDF)
 
-### Hadoop temps réel
+### Hadoop et temps réel
+
+On va utiliser des produits préinstallé dans les principales distribution d'Hadoop (cloudera et HortonWorks)
 
 #### Un cas
 
@@ -809,9 +820,264 @@ Dans ce schéma, les utilisateurs réalisent des requêtes périodiques sur le s
 
 Kafka est bien plus qu'une file de messages et peut être utilisé comme une plateforme complète d'échanges de données. En pratique, cela signifie que Kafka peut agir comme une plateforme distribuée qui centralise tous les messages qui transitent entre différentes applications. Documentation officielle : [https://kafka.apache.org/documentation/](https://kafka.apache.org/documentation/)
 
-On va utiliser une image docker de Kafka proposer par Spotify.
+Il y a une image Docker de prète dans le repertoire docker-kafka. On la lance avec 
 
-	docker pull spotify/kafka
-	docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=`docker-machine ip \`docker-machine active\`` --env ADVERTISED_PORT=9092 spotify/kafka
+	docker-compose up -d
+
+Pour exécuter Kafka, nous avons besoin de lancer deux composants :
+
+* Zookeeper, qui est le gestionnaire de cluster de Kafka.
+* Un serveur Kafka que l'on nommera broker.
+
+Zookeeper n'est pas notre file de messages, mais c'est un composant essentiel pour que Kafka fonctionne : en tant que gestionnaire de cluster, c'est Zookeeper qui est en charge de réaliser la synchronisation des différents éléments d'un cluster. Dans un cluster composé de plusieurs machines, les différents services passent par Zookeeper pour échanger des données et stocker leur configuration; Zookeeper permet également la découverte de services. Vous n'aurez pas à savoir grand-chose de plus sur Zookeeper, mais vous êtes encouragés à consulter la documentation officielle ainsi que le wiki pour en apprendre plus. [https://zookeeper.apache.org/doc/trunk/](https://zookeeper.apache.org/doc/trunk/) [https://cwiki.apache.org/confluence/display/ZOOKEEPER/Index](https://cwiki.apache.org/confluence/display/ZOOKEEPER/Index)
+
+On se connecte en shell au container qui fait tourner Kafka :
+
+	docker exec -it kafka bash
 	
+Dans ce container on va créer un topic de test :
+
+	cd /opt/kafka_2.11-0.10.1.0
+	./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic blabla
+	
+On peut lister les topics avec la commande :
+	
+	./bin/kafka-topics.sh --list --zookeeper localhost:2181
+	./bin/kafka-topics.sh --list --zookeeper localhost:2181 --describe
+	
+Dans kafka, on produit les messages avec des producers et on les consomme avec des consummers.
+
+	./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic blabla
+
+On les lit avec le consummer :
+
+	./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic blabla
+	
+Après avoir lancé le producer et le consumer, essayez de taper quelques messages dans l'entrée standard du **producer**. Ces messages devraient apparaître dans la sortie du **consumer**.
+
+Observez-vous une petite latence entre le moment où vous envoyez le message et le moment où il est reçu par le consumer ? Ceci est dû au fait que, par défaut, le producer envoie les messages par lots de 200 avec une latence maximale de 1000 ms. Pour modifier ce comportement du producer, utilisez l'option--batch-size=1ou--timeout=0.
+
+Ici on reste sur du fonctionnement âr défaut, les messages sont stocké 168h (7jours) avant d'être effacées.
+
+	./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic blabla
+
+Mais le fonctionnement attendu, pour nous, est de relever un message et de ne le traiter qu'une fois. Pour faire cela on utilise un **groupe** pour le consummer.
+
+	./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic blabla --consumer-property group.id=mygroup
+
+On peut avoir les listes et info des groupes avec les commandes
+
+	./bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
+	./bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group mygroup
+	
+Les groupes vont nous permettre de passer à l'echelle en mutlipliant les consummers. Si on lance un second consummer sur le même groupe, on constate que seul le premier récupère les messages. Vous le voyez aussi ?
+
+C'est pour notre bien, Kafka fait ça pour nous garantir le traitement des messages dans l'ordre. On ne peut pas avoir plus de consummers que de partitions (et notre producers n'a qu'une partition).
+
+![img-md/example_kafka-producer-consumer.jpeg](img-md/example_kafka-producer-consumer.jpeg)
+
+Une partition est une manière de distribuer les données d'un même topic. Lors de la création d'un topic, on indique le nombre de partitions souhaité, comme on l'a vu plus haut avec l'option--partitionspassée à la commandekafka-topics.sh --create.
+
+Un topic peut être composé de plusieurs partitions. Chacune de ces partitions contient des messages différents. Lorsqu'un producer émet un message, c'est à lui de décider à quelle partition il l'ajoute. Ce choix d'une partition peut se faire de différentes manières, dont voici quelques exemples (non exhaustifs) :
+
+* Aléatoirement : pour chaque message, une partition est choisie au hasard. C'est ce qui est fait par notrekafka-console-producer.
+* Round robin : le producer itére sur les partitions les unes après les autres pour distribuer un nombre de message égal sur chaque partition.
+* Hashage : le producer peut choisir une partition en fonction du contenu du message. C'est une fonctionnalité que nous verrons dans le chapitre suivant.
+
+Chaque partition est une FIFO. kafka conserve conserve en mémoire l'emplacement du curseur de lecture de chaque partitions.
+
+C'est les consumers qui vont demander à kafka de faire évoluer ce curseur dans chaque partition.
+
+On va modifier notre topic pour augmenter le nombre de partitions 
+
+	./bin/kafka-topics.sh --alter --zookeeper localhost:2181 --topic blabla --partitions 2
+	
+C'est mieux ? Refaites le test.
+
+##### On dev avec Kafka
+
+Allez créer un compte sur 
+
 	https://developer.jcdecaux.com
+	
+On va avoir besoin d'une clef d'API. Quand vous l'avez, on test, sur le container python :
+
+	curl https://api.jcdecaux.com/vls/v1/stations?apiKey=XXX
+	curl https://api.jcdecaux.com/vls/v1/stations?apiKey=XXX | python -m json.tool
+	
+Notre but va être de mettre en place une application qui va nous afficher les évolutions des places de velib sous cette forme.
+
+	+1 MAZARGUES - ROND POINT DE MAZARGUES (OBELISQUE) (Marseille)
+	+14 Lower River Tce / Ellis St (Brisbane)
+	+2 2 RUE GATIEN ARNOULT (Toulouse)
+	+20 ANGLE ALEE ANDRE MURE ET QUAI ANTOINE RIBOUD (Lyon)
+	+14 Smithfield North (Dublin)
+	+28 52 RUE D'ENGHIEN / ANGLE RUE DU FAUBOURG POISSONIERE - 75010 PARIS (Paris)
+	+6 RUE DES LILAS ANGLE BOULEVARD DU PORT - 95000 CERGY (Cergy-Pontoise)
+	+6 San Juan Bosco - Santiago Rusiñol (Valence)
+	+21 AVENIDA REINA MERCEDES - Aprox. Facultad de Informática (Seville)
+	+6 Savska cesta 1 (Ljubljana)
+	+31 DE BROUCKERE - PLACE DE BROUCKERE/DE BROUCKEREPLEIN (Bruxelles-Capitale)
+	+7 BRICHERHAFF - AVENUE JF KENNEDY / RUE ALPHONSE WEICKER (Luxembourg)
+	...
+
+###### Producer
+
+On créé un repertoire kafkaPython et dans `velib-get-stations.py` :
+
+	import json
+	
+	import time
+	
+	import urllib.request
+	
+	
+	from kafka import KafkaProducer
+	API_KEY = "XXX" # FIXME Set your own API key here	
+	url = "https://api.jcdecaux.com/vls/v1/stations?apiKey={}".format(API_KEY)
+	
+	producer = KafkaProducer(bootstrap_servers="kafka:9092")
+	
+	while True:
+	    response = urllib.request.urlopen(url)
+	    stations = json.loads(response.read().decode())
+	    for station in stations:
+	        producer.send("velib-stations", json.dumps(station).encode())
+	    print("{} Produced {} station records".format(time.time(), len(stations)))
+	    time.sleep(1)
+	    
+Coté Kafka, il faut créer le topic qui va accueillir les messages :
+
+	./bin/zookeeper-server-start.sh ./config/zookeeper.properties
+	./bin/kafka-server-start.sh ./config/server.properties
+	./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic velib-stations
+
+###### Consummer
+
+On créé le consummer `velib-monitor-stations.py`
+
+	import json
+	from kafka import KafkaConsumer
+	
+	stations = {}
+	consumer = KafkaConsumer("velib-stations", bootstrap_servers='localhost:9092', group_id="velib-monitor-stations")
+	for message in consumer:
+	    station = json.loads(message.value.decode())
+	    station_number = station["number"]
+	    contract = station["contract_name"]
+	    available_bike_stands = station["available_bike_stands"]
+	
+	    if contract not in stations:
+	        stations[contract] = {}
+	    city_stations = stations[contract]
+	    if station_number not in city_stations:
+	        city_stations[station_number] = available_bike_stands
+	
+	    count_diff = available_bike_stands - city_stations[station_number]
+	    if count_diff != 0:
+	        city_stations[station_number] = available_bike_stands
+	        print("{}{} {} ({})".format(
+	            "+" if count_diff > 0 else "",
+	            count_diff, station["address"], contract
+	        ))
+
+Ici on a créé le consummer. On pourrait maintenant ajouter un nouveau producer dans ce consumer pour chainer avec un autre consumer pour envoyer des mails par exemple.
+
+Pour le moment, on est pas scalable
+
+![img-md/example_kafka-velib-1partition.jpeg](img-md/example_kafka-velib-1partition.jpeg)
+
+Si on veut multiplier les consummers pour passer à l'echelle :
+
+	./bin/kafka-topics.sh --alter --zookeeper localhost:2181 --topic velib-stations --partitions 10
+	
+On peut maintenant lancé un nouveau consummer.
+
+![img-md/example_kafka-velib-10partitions.jpeg](img-md/example_kafka-velib-10partitions.jpeg)
+
+
+###### Optimisation du fonctionnement
+
+Il serait interessant que tous les messages d'une station soit stockées dans une même partition.
+
+	producer.send(..., key=str(station["number"]).encode())
+	
+On utilise une fonction pour envoyer les messages à la même queue pour la même station
+
+![img-md/example_kafka-key-hashing.jpeg](img-md/example_kafka-key-hashing.jpeg)
+
+Le fichier `velib-get-stations.py` devient :
+
+	#! /usr/bin/env python3
+	import json
+	import time
+	import urllib.request
+	
+	# Run `pip install kafka-python` to install this package
+	from kafka import KafkaProducer
+	
+	API_KEY = "XXX" # FIXME
+	url = "https://api.jcdecaux.com/vls/v1/stations?apiKey={}".format(API_KEY)
+	
+	producer = KafkaProducer(bootstrap_servers="localhost:9092")
+	
+	while True:
+	    response = urllib.request.urlopen(url)
+	    stations = json.loads(response.read().decode())
+	    for station in stations:
+	        producer.send("velib-stations", json.dumps(station).encode(),
+	                      key=str(station["number"]).encode())
+	    print("Produced {} station records".format(len(stations)))
+	    time.sleep(1)
+	    
+Une autre optimisation va être de changer le règlage de la rentention. par exemple en demandant de supprimer les datas toutes les 4 secondes.
+	
+	./bin/kafka-configs.sh --zookeeper localhost:2181 --entity-type topics --entity-name velib-stations --alter --add-config retention.ms=4000
+	
+En modifiant le paramètreretention.ms, on demande à Kafka d'effacer un segment de données toutes les quatre secondes. Un segment est une succession de messages dans une partition. Par défaut, un nouveau segment est créé chaque semaine, et dès que la quantité de messages dépasse 1 Go. Pour que la nouvelle valeur du paramètreretention.mssoit effective, il faut donc diminuer la longueur maximale d'un segment :
+
+	./bin/kafka-configs.sh --zookeeper localhost:2181 --entity-type topics --entity-name velib-stations --alter --add-config segment.ms=2000
+	
+On est au top.
+
+##### Exercice Kafka
+
+Dans cette activité, vous allez tout d'abord créer un topic empty-stations dans votre cluster Kafka. Puis, vous allez modifier le script `get-stations.py`
+
+	#! /usr/bin/env python3
+	import json
+	import time
+	import urllib.request
+	
+	# Run `pip install kafka-python` to install this package
+	from kafka import KafkaProducer
+	
+	API_KEY = "XXX" # FIXME
+	url = "https://api.jcdecaux.com/vls/v1/stations?apiKey={}".format(API_KEY)
+	
+	producer = KafkaProducer(bootstrap_servers="localhost:9092")
+	
+	while True:
+	    response = urllib.request.urlopen(url)
+	    stations = json.loads(response.read().decode())
+	    for station in stations:
+	        producer.send("velib-stations", json.dumps(station).encode(),
+	                      key=str(station["number"]).encode())
+	    print("Produced {} station records".format(len(stations)))
+	    time.sleep(1)
+
+
+ pour :
+
+1. émettre un message dans le topic empty-stations dès qu'une station devient vide (alors qu'elle n'était pas vide auparavant).
+2. émettre un message dans le topic empty-stations dès qu'une station n'est plus vide (alors qu'elle était vide auparavant).
+
+Enfin, vous allez écrire un script monitor-empty-stations.py qui va afficher dans la console un message dès qu'une station devient vide (alors qu'elle n'était pas vide auparavant). Ce message devra contenir :
+
+1. l'adresse de la station,
+2. la ville de la station,
+3. le nombre de stations vides dans la ville.
+
+Vous veillerez à ce que le nombre de stations vides affiché par le script monitor-empty-stations.py soit correct même lorsque le topic empty-stations aura plusieurs partitions.
+
+Attention ! Il peut y avoir des stations avec des identifiants identiques dans des villes différentes.
