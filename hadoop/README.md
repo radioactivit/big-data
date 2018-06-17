@@ -725,13 +725,11 @@ Puis `WordCountReducer.py` :
 
 On peut executer ensuite la fonction mapReduce avec la commande 
 	
-	hadoop jar /opt/hadoop-2.7.1/share/hadoop/tools/lib/hadoop-streaming-2.7.1.ja -input /input/airspace.txt -output /resultsPyhton -mapper ./WordCountMapper.py -reducer ./WordCountReducer.py
+	hadoop jar /opt/hadoop-2.7.1/share/hadoop/tools/lib/hadoop-streaming-2.7.1.jar -input /input/airspace.txt -output /resultsPyhton -mapper ./WordCountMapper.py -reducer ./WordCountReducer.py
 
 [https://bitbucket.org/uhopper/hadoop-docker](https://bitbucket.org/uhopper/hadoop-docker)
 
 ### Les exemples Hadoop
-
-
 
 [https://github.com/apache/hadoop/tree/trunk/hadoop-mapreduce-project/hadoop-mapreduce-examples/src](https://github.com/apache/hadoop/tree/trunk/hadoop-mapreduce-project/hadoop-mapreduce-examples/src)
 
@@ -744,7 +742,15 @@ Chacun en prend un, et explique sur Slack :
 
 Exemple wordcount avec HDFS (à sauter): [https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html](https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html)
 
-Exercice plus original (à faire) :
+#### Exercice MapReduce sur données boutiques
+
+Il y a dans le repository un csv `SalesJan2009.csv`. Dans ce csv, chaque ligne représente une vente de produits.
+
+Information: en Java pour découper une ligne de csv séparé par des virgule, on utilise la fonction de la classe string : valueString.split(",");
+
+La question à répondre avec MapReduce est : combien de produit ont été vendu par pays ?
+
+Solution :
 [https://www.guru99.com/create-your-first-hadoop-program.html](https://www.guru99.com/create-your-first-hadoop-program.html)
 
 ### Hadoop Map Reduce Exercice à faire
@@ -1081,3 +1087,6 @@ Enfin, vous allez écrire un script monitor-empty-stations.py qui va afficher da
 Vous veillerez à ce que le nombre de stations vides affiché par le script monitor-empty-stations.py soit correct même lorsque le topic empty-stations aura plusieurs partitions.
 
 Attention ! Il peut y avoir des stations avec des identifiants identiques dans des villes différentes.
+
+#### Apache Storm
+
