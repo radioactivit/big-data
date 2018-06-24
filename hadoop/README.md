@@ -966,7 +966,7 @@ On créé le consummer `velib-monitor-stations.py`
 	from kafka import KafkaConsumer
 	
 	stations = {}
-	consumer = KafkaConsumer("velib-stations", bootstrap_servers='localhost:9092', group_id="velib-monitor-stations")
+	consumer = KafkaConsumer("velib-stations", bootstrap_servers='kafka:9092', group_id="velib-monitor-stations")
 	for message in consumer:
 	    station = json.loads(message.value.decode())
 	    station_number = station["number"]
@@ -1088,5 +1088,31 @@ Vous veillerez à ce que le nombre de stations vides affiché par le script moni
 
 Attention ! Il peut y avoir des stations avec des identifiants identiques dans des villes différentes.
 
-#### Apache Storm
+#### Apache Storm (très orienté DEV, à faire en dernier)
+
+Kafka est un gestionnaire de message, son role n'est pas de traiter les données mais de les transmettre à un outil dont ça va être le job.
+
+Apache Storm est un outil de traitement de données.
+
+On va traiter dans Strom des T-uple. Exemple de T-uple en python :
+
+	mon_tuple = (1, "ok", "olivier")
+	
+Ces T-uples seront générés pas les noeud "spout" et transmis pour traitement aux noeuds "bolt" qui pourront également les envoyés à d'autre noeud "bolt". Dans Storm, ce DAG s'appelle une topologie.
+
+![img-md/example_storm-spouts-bolts.jpeg](img-md/example_storm-spouts-bolts.jpeg)
+
+Une représentation plus proche de la réalité :
+
+![img-md/example_storm-spouts-bolts-distributed.jpeg](img-md/example_storm-spouts-bolts-distributed.jpeg)
+
+Dans le cas d'un exemple de comptage de nombre de visite par visiteur d'un site basé sur les logs, le premier cas de ventilation des données "SPOUT" vers "BOLT" n'est pas concluant, controlé la répartition (field grouping) résoud le problème :
+
+![img-md/example_storm-user-visits.jpeg](img-md/example_storm-user-visits.jpeg)
+
+Cette topologie se code soit en Java, soit en Python.
+
+Un exemple de création de topologie en python avec StreamParse :
+
+https://github.com/Parsely/streamparse/blob/master/doc/source/quickstart.rst
 
