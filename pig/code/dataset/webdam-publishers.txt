@@ -1,0 +1,3 @@
+Fundations of Databases	Addison-Wesley	USA
+Fundations of Databases	Vuibert	France
+Web Data Management and Distribution	CUP	GB

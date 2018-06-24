@@ -1,0 +1,105 @@
+1981	SIGMOD Record	Record of the Workshop on Research in Office Semantics.
+1996	SIGMOD Record	ACT-NET - The Active Database Management System Manifesto: A Rulebase of ADBMS Features.
+1994	SIGMOD Record	Loading Databases Using Dataflow Parallelism.
+1988	SIGMOD Record	Scheduling Real-time Transactions.
+1993	SIGMOD Record	Helping Computer Scientists in Romania.
+1989	SIGMOD Record	The Role of Linkage-Graphs in Prolog Relational Datenbases.
+2002	SIGMOD Record	Phoenix Project: Fault-Tolerant Applications.
+2004	SIGMOD Record	Simulation data as data streams.
+1991	SIGMOD Record	Temporal Relations in Geographic Information Systems: A Workshop at the University of Maine.
+1997	SIGMOD Record	Integrating Modelling Systems for Environmental Management Information Systems.
+1990	SIGMOD Record	An SQL-Based Query Language For Networks of Relations.
+2001	SIGMOD Record	Advanced XML Data Processing - Guest Editor's Introduction.
+1989	SIGMOD Record	ACM TODS Publication Policy.
+2001	SIGMOD Record	Book Review Column.
+2003	SIGMOD Record	Peer-to-peer research at Stanford.
+2002	SIGMOD Record	Book Review Column.
+1981	SIGMOD Record	A Note on Decompositions of Relational Databases.
+2002	SIGMOD Record	Book Review Column.
+2004	SIGMOD Record	Book Review: Database Tuning Principles, Experiments, and Troubleshooting Techniques - by Dennis Shasha and Philippe Bonnet .
+2002	SIGMOD Record	Book Review Column.
+1981	SIGMOD Record	SIGMOD Regional Workshops.
+2002	SIGMOD Record	Book Review Column.
+1981	SIGMOD Record	Treasuer's Report.
+2003	SIGMOD Record	Call for Book Reviews.
+1981	SIGMOD Record	Proposals Sought for SIGMOD Regional Conferences or Workshops.
+2003	SIGMOD Record	Report on the First International Conference on Ontologies, Databases and Applications of Semantics.
+1982	SIGMOD Record	Data Base Directions II: The Conversion Problem - Editorial.
+2003	SIGMOD Record	Book review column.
+1982	SIGMOD Record	Proposals Sought for SIGMOD Regional Conferences or Workshops.
+2003	SIGMOD Record	Guest editor's introduction.
+1999	SIGMOD Record	Semantic Integration of Semistructured and Structured Data Sources.
+2003	SIGMOD Record	Book review column.
+1996	SIGMOD Record	Workshop Report: The First International Workshop on Active and Real-Time Database Systems (ARTDB-95).
+2004	SIGMOD Record	Book Review Column.
+2001	SIGMOD Record	Report on the 2001 SIGMOD and PODS Awards.
+2004	SIGMOD Record	Book Review Column.
+1988	SIGMOD Record	A Note on Minimal Covers.
+2003	SIGMOD Record	P-Grid: a self-organizing structured P2P system.
+1998	SIGMOD Record	Repositories and Object Oriented Databases.
+2002	SIGMOD Record	A Framework for Semantic Gossiping.
+2005	SIGMOD Record	An apples-to-apples comparison of two database journals.
+1999	SIGMOD Record	On Views and XML.
+1996	SIGMOD Record	An Orthogonally Persistent Java.
+1990	SIGMOD Record	New Hope on Data Models and Types: Report of an NSF-INRIA Workshop.
+1981	SIGMOD Record	Errors in 'Process Synchronization in Database Systems'.
+1995	SIGMOD Record	Response to "A Close Look at the IFO Data Model".
+1997	SIGMOD Record	Semistructured und Structured Data in the Web: Going Back and Forth.
+2005	SIGMOD Record	In memory of Seymour Ginsburg 1928 - 2004.
+1999	SIGMOD Record	Towards Adaptive Workflow Systems, CSCW-98 Workshop Report.
+1981	SIGMOD Record	Election for SIGMOD Officers.
+2000	SIGMOD Record	A Vision of Management of Complex Models.
+1996	SIGMOD Record	Overview of the STanford Real-time Information Processor (STRIP).
+2004	SIGMOD Record	Industrial-Strength Schema Matching.
+2001	SIGMOD Record	Re-designing Distance Functions and Distance-Based Applications for High Dimensional Data.
+1995	SIGMOD Record	ACM Multimedia '94 Conference Workshop on Multimedia Database Management Systems.
+1983	SIGMOD Record	Deadlock Detection is Cheap.
+1998	SIGMOD Record	WebDB '98: International Workshop on the Web and Databases.
+2006	SIGMOD Record	Dynamic count filters.
+2001	SIGMOD Record	Quality of Service in Multimedia Digital Libraries.
+1996	SIGMOD Record	Spotfire: An Information Exploration Environment.
+1982	SIGMOD Record	New Proposal for a Common Command Language in Information Systems.
+2003	SIGMOD Record	An environmental sensor network to determine drinking water quality and security.
+2003	SIGMOD Record	A Database Approach to Quality of Service Specification in Video Databases.
+2003	SIGMOD Record	Time management for new faculty.
+2005	SIGMOD Record	Exchange, integration, and consistency of data: report on the ARISE/NISR workshop.
+2003	SIGMOD Record	Exposing undergraduate students to database system internals.
+1994	SIGMOD Record	Data Modelling in the Large.
+2005	SIGMOD Record	Information source selection for resource constrained environments.
+2002	SIGMOD Record	Data Mining: Concepts and Techniques - Book Review.
+1993	SIGMOD Record	Bibliography on Spatiotemporal Databases.
+1996	SIGMOD Record	Advances in Real-Time Database Systems Research.
+1994	SIGMOD Record	Trade Press News.
+1998	VLDB J.	Integrating Reliable Memory in Databases.
+1996	VLDB J.	Query Processing and Optimization in Oracle Rdb
+1996	VLDB J.	A Complete Temporal Relational Algebra.
+1996	SIGMOD Record	Report on First International Workshop on Real-Time Database Systems.
+1994	SIGMOD Record	Trade Press News.
+1995	SIGMOD Record	Digital Library Services in Mobile Computing.
+1994	SIGMOD Record	Trade Press News - Announcement and Preface.
+1996	SIGMOD Record	TCP-D - The Challenges, Issues and Results.
+1995	SIGMOD Record	Trade Press News.
+1995	SIGMOD Record	Trade Press News.
+1995	SIGMOD Record	Managing Video Data in a Mobile Environment.
+1997	SIGMOD Record	Intelligent Access to Heterogeneous Information Sources: Report on the 4th Workshop on Knowledge Representation Meets Databases.
+2005	SIGMOD Record	Report on the DB/IR panel at SIGMOD 2005.
+2001	SIGMOD Record	EIHA?!?: Deploying Web and WAP services using XML Technology.
+2005	SIGMOD Record	Report from the first international workshop on computer vision meets databases (CVDB 2004).
+2005	SIGMOD Record	Artemis message exchange framework: semantic interoperability of exchanged messages in the healthcare domain.
+1986	SIGMOD Record	The Proteus Bibliography: Representation and Interactive Display in Databases.
+1998	SIGMOD Record	Component-based E-Commerce: Assesment of Current Practices and Future Directions.
+1994	SIGMOD Record	SEQUOIA 2000 Metadata Schema for Satellite Images.
+2006	SIGMOD Record	Report on the 10th International Symposium on Database Programming Languages: (DBPL 2005).
+1996	SIGMOD Record	DeeDS Towards a Distributed and Active Real-Time Database System.
+2001	SIGMOD Record	Continuous Queries over Data Streams.
+2004	SIGMOD Record	Kanata: Adaptation and Evolution in Data Sharing Systems.
+1996	SIGMOD Record	The BeSS Object Storage Manager: Architecture Overview.
+2003	SIGMOD Record	Review of The data warehouse toolkit: the complete guide to dimensional modeling (2nd edition) by Ralph Kimball, Margy Ross. John Wiley & Sons, Inc. 2002.
+2001	SIGMOD Record	Special Issue on Data Mining for Intrusion Detection and Threat Analysis - Guest Editor's Introduction.
+1993	SIGMOD Record	Extending the Scope of Database Services.
+2004	SIGMOD Record	BioFast: Challenges in Exploring Linked Life Science Sources.
+1996	SIGMOD Record	MQSeries and CICS Link for Lotus Notes.
+1994	SIGMOD Record	The Impact of Database Research on Industrial Products (Panel Summary).
+2006	SIGMOD Record	The WS-DAI family of specifications for web service data access and integration.
+1977	SIGMOD Record	CR Classification System.
+2002	SIGMOD Record	The p Operator: Discovering and Ranking Associations on the Semantic Web.
