@@ -849,7 +849,7 @@ Dans ce container on va créer un topic de test :
 On peut lister les topics avec la commande :
 	
 	./bin/kafka-topics.sh --list --zookeeper localhost:2181
-	./bin/kafka-topics.sh --list --zookeeper localhost:2181 --describe
+	./bin/kafka-topics.sh --zookeeper localhost:2181 --describe
 	
 Dans kafka, on produit les messages avec des producers et on les consomme avec des consummers.
 
