@@ -37,7 +37,7 @@ Son développement a commencé en 2008, il y a une version par an proposée la d
 
 ## On essaie
 
-	docker run --rm -it -v /Users/franckm/dev/formation/big-data/pig/code:/code:rw tinchou/apache-pig word_count.pig
+	docker run --rm -it -v /Users/franckm/dev/formation/big-data/pig/code:/code:rw tinchou/apache-pig wordcount/word_count.pig
 
 Si on avait souhaité exécuter la ligne de commande grunt et éxécuté à la main des commandes PIG :
 
