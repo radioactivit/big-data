@@ -1,0 +1,33 @@
+version: '3.7'
+services:
+    db:
+        image: mysql
+        container_name: formation_db
+        command: ["--default-authentication-plugin=mysql_native_password"]
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: formation
+            MYSQL_USER: formation
+            MYSQL_PASSWORD: formation
+        volumes:
+            - mysqlformation:/var/lib/mysql
+    php-fpm:
+        build: ./dockerfiles/php-fpm
+        container_name: formation_php
+        volumes:
+            - ./:/var/www/formation:rw,cached
+    nginx:
+        image: nginx:latest
+        container_name: formation_nginx
+        ports:
+            - "8080:80"
+        volumes:
+            - ./:/var/www/formation:rw,cached
+            - ./conf/nginx/formation.conf:/etc/nginx/conf.d/formation.conf:ro
+        extra_hosts:
+            - "formation.localhost:127.0.0.1"
+
+volumes:
+    mysqlformation:
