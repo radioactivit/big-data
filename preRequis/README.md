@@ -423,7 +423,7 @@ cf. le dossier pgsql
 
 # Le NoSQL (en route vers la big data)
 
-Un très bon cours sur Open Classroom : [https://openclassrooms.com/courses/maitrisez-les-bases-de-donnees-nosql]()
+Un très bon cours sur Open Classroom : [https://openclassrooms.com/courses/maitrisez-les-bases-de-donnees-nosql](https://openclassrooms.com/courses/maitrisez-les-bases-de-donnees-nosql)
 
 ## Pourquoi
 
@@ -431,7 +431,7 @@ Contrainte d’écriture. Contrainte de lecture. Enjeu de performance.
 
 ### Limitation du SQL et du modèle ACID
 
-ACID thanks to wikipedia : [https://en.wikipedia.org/wiki/ACID]()
+ACID thanks to wikipedia : [https://en.wikipedia.org/wiki/ACID](https://en.wikipedia.org/wiki/ACID)
 
 ![](img-md/ACID_BASE.png)
 
@@ -526,9 +526,9 @@ Proposer dans le slack un lien vers une offre en mode cloud pour
 
 ## Couchbase
 
-[https://docs.docker.com/samples/library/couchbase/]()
+[https://docs.docker.com/samples/library/couchbase/](https://docs.docker.com/samples/library/couchbase/)
 
-[https://developer.couchbase.com/documentation/server/4.0/sdks/node-2.0/quick-start.html]()
+[https://developer.couchbase.com/documentation/server/4.0/sdks/node-2.0/quick-start.html](https://developer.couchbase.com/documentation/server/4.0/sdks/node-2.0/quick-start.html)
 
 ## CouchDB
 
@@ -552,8 +552,8 @@ Proposer dans le slack un lien vers une offre en mode cloud pour
 
 ## RabbitMQ
 
-[https://hub.docker.com/_/rabbitmq/]()
+[https://hub.docker.com/_/rabbitmq/](https://hub.docker.com/_/rabbitmq/)
 
-[https://github.com/mikeyyuen/python-rabbitmq-docker]()
+[https://github.com/mikeyyuen/python-rabbitmq-docker](https://github.com/mikeyyuen/python-rabbitmq-docker)
 
-[https://www.rabbitmq.com/tutorials/tutorial-one-python.html]()
+[https://www.rabbitmq.com/tutorials/tutorial-one-python.html](https://www.rabbitmq.com/tutorials/tutorial-one-python.html)
