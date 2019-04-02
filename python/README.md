@@ -219,7 +219,7 @@ Tester ce que ça donne avec des nombres négatifs : par exemple aString[-1:]
 
 On compte :
 
-- arrays
+- arrays (https://docs.python.org/3.4/library/array.html)
 - lists (la reine des datastructures en Python !)
 - dictionnaires
 - tuples
