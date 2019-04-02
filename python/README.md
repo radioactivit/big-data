@@ -310,3 +310,92 @@ Un itérable, ce peut être un tuple, une liste, un set...
         #Ou alors la condition est réévaluée à chaque fois
 
 A la place de booleen, on peut avoir une expression qui est réévaluée à chaque tour de boucle, par exemple : `len(myList) > 0`
+
+### Les fonctions, un type à part entière
+
+Une fonction permet d'avoir du code reproductile
+
+Voici un exemple de fonction qui prend en paramètre deux variables a et b et ne renvoie rien
+
+    def functionThatPrintsItsBothInput(a,b):
+        print(a,b)
+
+Un autre exemple de fonction qui prend en paramètre deux nombres a et b et renvoie le plus petit des deux
+
+    def minimum(a,b):
+        if a <= b:
+            return a
+        else:
+            return b
+
+Ce qui est renvoyé par une fonction est ce que le statement return reçoit en paramètre.
+On peut renvoyer plusieurs choses, mais à ce moment-là ça revient à renvoyer un tuple.
+
+Dans la fonction précédente, le else ne sert à rien, on pourrait écrire tout aussi bien :
+
+    def minimum(a,b):
+        if a <= b:
+            return a
+        return b
+
+Evidemment, on a mieux en Python pour trouver le minimum entre deux nombres ! Par exemple, la fonction min qui est native.
+Du coup notre fonction réinvente un peu la roue (...). N'hésitez pas à jouer avec la fonction `min` et à voir ce qu'elle prend en paramètre et ce qu'elle renvoie.
+
+Un argument peut avoir une valeur par défaut
+
+    def minimum(a,b=0):
+        if a <= b:
+            return a
+        return b
+
+Si on ne fournit pas la deuxième valeur, vaudra 0 par défaut.
+
+Bien entendu mais on le savait déjà, pour évaluer une fonction on procède ainsi :
+
+    print(minimum(12,2))
+    print(minimum(12))
+
+On peut aussi appeler la fonction en nommant ses arguments, par exemple :
+
+    minimum(b=12,a=14)
+
+A ce moment-là l'ordre des arguments n'importe pas !
+
+Questions :
+
+1. Que donne type(minimum) ? Une fonction serait donc un objet ?!
+2. Supposons qu'on construise cette fonction :
+
+```
+def listAllMethodsOfAnObbject(anObject):
+   return [method_name for method_name in dir(anObject) if callable(getattr(anObject, method_name))]
+```
+
+Regarder ce que notre fonction renvoie pour notre fonction minimum. Qu'en penser ?
+
+3. Créer une liste de fonctions. Voir comment ça se comporte.
+4. Créer une fonction qui renvoie une fonction. Voir comment ça se comporte.
+
+### Et si on créait nos propres types via des classes ?
+
+```
+class Dog:
+    kind = 'chien' # variable de classe
+
+    def __init__(self, name):
+        self.name = name #variable d'instance
+
+    def tellMyName(self):
+        print("My name is",self.name)
+
+myDog = Dog("Milou")
+myDog.tellMyName()
+```
+
+Dans cet exemple on dit que :
+
+- Dog est une classe
+- myDog est une instance de la classe Dog
+- name est une variable instance ou un champ ou une propriété de l'objet. Chaque instance peut avoir son propre name !
+- kind est une variable de classe, partagée par TOUTES les instances
+- tellMyName est une méthode d'instance
