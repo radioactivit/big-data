@@ -101,10 +101,12 @@ Questions :
 
 1. Les fichiers Python auront pour extension `.py`. Après avoir créer un projet (dans PyCharm) ou avoir créer un dossier et l'avoir ouvert avec VSCode, on créer un fichier `hello.py` où on saisira ce qui suit ou une variante (je tiens à ce que la somme fasse bien 42 cela dit !) :
 
-   print("Hello World !")
-   a = 20
-   b = 22
-   print(a + b)
+```
+print("Hello World !")
+a = 20
+b = 22
+print(a + b)
+```
 
 En ligne de commande, on se rendra dans le dossier où se trouve notre fichier.
 On saisira `python hello.py` et on observera le résultat.
