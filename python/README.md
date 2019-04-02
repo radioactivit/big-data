@@ -177,3 +177,40 @@ On a vu sur le passage :
 - une boucle for où on a parcouru les éléments successifs de quelque chose que l'on pouvait parcourir
 
 3. Trouver un moyen de récupérer les arguments et passer les arguments. On pourra regarder `sys.argv` !
+
+### Types primitifs
+
+Il existe seulement 4 types primitifs en Python :
+
+- les booléens
+- les entiers
+- les float
+- les string
+
+Quelques exemples :
+
+    anInteger = 53
+    aFloat = 56.7
+    aBoolean = False
+    aString = "bonjour"
+    anotherString = 'salut'
+    aLastString = """Coucou !"""
+
+Questions :
+
+1. Trouver comment sommer/soustraire deux entiers/float
+2. En faire leur produit et division
+3. On peut manipuler les chaînes de caractères très simplement (pour extraite des sous-chaînes ou ce genre de choses)
+
+```
+#Prendre la chaîne sans le premier caractère (les chaînes commençent à 0)
+aString[1:]
+#Prendre de l'index 1 (inclus) à l'index 3 (exclus). Donc comprend 3 caractères
+aString[1:3]
+#Prendre un caractère sur 2 à partir de celui à l'index 1 et jusqu'à l'index 10. On peut mettre 3 à la place de 2 évidemment
+aString[1:10:2]
+#Evidemment pour extraire juste le premier caractère par exemple
+aString[0]
+```
+
+Tester ce que ça donne avec des nombres négatifs : par exemple aString[-1:]
