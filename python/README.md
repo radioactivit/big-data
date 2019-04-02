@@ -262,5 +262,5 @@ myTuple[0]
 #ERREUR !
 myTuple[0] = 17
 
-#Créer un tuple avec en premier argument une liste et modifier cette liste !
+#Créer un tuple avec en premier argument une liste et modifier cette liste ! Immutable ou pas immutable ?
 ```
