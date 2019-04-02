@@ -1,0 +1,63 @@
+version: '2'
+
+services:
+  zookeeper:
+    image: zookeeper:3.4.9
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+        ZOO_MY_ID: 1
+        ZOO_PORT: 2181
+        ZOO_SERVERS: server.1=zookeeper:2888:3888
+    volumes:
+      - ./zoo/data:/data
+      - ./zoo/datalog:/datalog
+
+  kafka:
+    image: confluentinc/cp-kafka:4.1.0
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      # add the entry "127.0.0.1    kafka1" to your /etc/hosts file
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - ./kafka/data:/var/lib/kafka/data
+    depends_on:
+      - zoo
+
+  nimbus:
+    image: storm
+    container_name: nimbus
+    command: storm nimbus
+    depends_on:
+      - zookeeper
+    links:
+      - zookeeper
+    restart: always
+    ports:
+      - 6627:6627
+
+  supervisor:
+    image: storm
+    container_name: supervisor
+    command: storm supervisor
+    depends_on:
+      - nimbus
+      - zookeeper
+    links:
+      - nimbus
+      - zookeeper
+    restart: always
+
+  python:
+    build: python/.
+    container_name: python_kafka
+    depends_on:
+      - kafka

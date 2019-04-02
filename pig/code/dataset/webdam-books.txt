@@ -1,0 +1,8 @@
+1995	Fundations of Databases	Abiteboul
+1995	Fundations of Databases	Hull
+1995	Fundations of Databases	Vianu
+2010	Web Data Management	Abiteboul
+2010	Web Data Management	Manolescu
+2010	Web Data Management	Rigaux
+2010	Web Data Management	Rousset
+2010	Web Data Management	Senellart
