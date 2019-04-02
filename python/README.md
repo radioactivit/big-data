@@ -263,4 +263,50 @@ myTuple[0]
 myTuple[0] = 17
 
 #Créer un tuple avec en premier argument une liste et modifier cette liste ! Immutable ou pas immutable ?
+
+#Les sets sont un type de données très important !
+mySet = set([5,6,19,22])
+print(22 in mySet)
+print(23 in mySet)
+mySet.add(23)
+print(23 in mySet)
+mySet.remove(22)
+print(22 in mySet)
+
+#Pas de garantie sur l'ordonnancement d'un set ! Ca ne sert pas à ça.
+
+#En terme de complexité algorithmique, vérifier la présence d'un élément dans un set est en O(1)
+#Pour les listes, on est sur du O(n) où n incarne la taille de la liste
+
+#On peut utiliser in sur une liste également
+22 in [22,23,56]
+
+#On peut avoir la taille d'une liste ou d'un tuple ou d'un dictionnaire ou d'un set (...) :
+len([3,5,7])
+len((5,7))
+len(mySet)
+len(myDictionary)
 ```
+
+### Elements de structure
+
+#### If
+
+    if booleen:
+        print("condition is True !")
+
+#### for
+
+    for element in iterable:
+        print("Current element", element)
+
+Un itérable, ce peut être un tuple, une liste, un set...
+
+#### while
+
+    while booleen:
+        print("Condition is still true !")
+        #Généralement on change la valeur du booléen en question
+        #Ou alors la condition est réévaluée à chaque fois
+
+A la place de booleen, on peut avoir une expression qui est réévaluée à chaque tour de boucle, par exemple : `len(myList) > 0`
