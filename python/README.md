@@ -214,3 +214,53 @@ aString[0]
 ```
 
 Tester ce que ça donne avec des nombres négatifs : par exemple aString[-1:]
+
+### Non-primitive types
+
+On compte :
+
+- arrays
+- lists (la reine des datastructures en Python !)
+- dictionnaires
+- tuples
+- sets
+
+```
+#Un array peut contenir des string, des entiers ou des floats
+#Mais il faut que le même type tout du long. Ce type on le précise à la création.
+import array as arr
+a = arr.array("I",[3,18,12])
+type(a)
+
+#Les listes peuvent contenir toute sorte de choses en leur sein
+myList = [3,5,18,"bonjour"]
+#On peut manipuler les listes commes les chaînes de caractères. Ou plutôt on peut manipuler les chaînes de caractères comme les listes
+#Tous les éléments sauf le premier
+#Tous les éléments entre l'index 1 et l'index 8 exclus...
+
+myList.append("new element")
+type(myList)
+print(myList)
+
+#tester les méthodes sort, reverse, remove, pop...
+
+myDictionary = {"nom":"jacques","prenom":"pierre"}
+print(myDictionary["nom"])
+myDictionary["age"] = 18
+type(myDictionary)
+
+#On peut avoir une liste de dictionnaire
+#On peut avoir une liste dans un dictionnaire
+#On peut avoir une liste de dictionnaires dans un dictionnaire
+#Sky is the limit !
+
+#Les tuples se déclarent comme les listes mais avec des parenthèses au lieu des crochets
+#Ils sont IMMUTABLES
+#Mais leur contenu peut être mutable...
+myTuple = (5,6,7)
+myTuple[0]
+#ERREUR !
+myTuple[0] = 17
+
+#Créer un tuple avec en premier argument une liste et modifier cette liste !
+```
