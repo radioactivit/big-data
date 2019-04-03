@@ -399,3 +399,70 @@ Dans cet exemple on dit que :
 - name est une variable instance ou un champ ou une propriété de l'objet. Chaque instance peut avoir son propre name !
 - kind est une variable de classe, partagée par TOUTES les instances
 - tellMyName est une méthode d'instance
+
+On peut faire de l'héritage et créer une classe Caniche qui hériterait de la classe Dog et y créer de nouvelles méthodes ou `redéfinir` des méthodes présentes dans la classe Dog. Ainsi, un Caniche pourrait avoir un tellMyName différent, qui utilise ou non le tellMyName de la classe Dog d'ailleurs.
+
+### List comprehension
+
+La syntaxe employée dans la fonction `listAllMethodsOfAnObbject` un peu plus haut est redoutable !
+Je peux créer facilement une liste à partir d'une autre liste en la filtrant et en appliquant un traitment à chaque élément.
+
+Vous avez dit map, filter, (reduce) ?
+
+    #range(0,1000) correspond à tous les nombres entre 0 et 999. On veut filtrer et ne garder que les nombres pairs. Puis pour chaque nombre restant, on veut mapper le nombre sur son double
+    [i * 2 for i in range(0,1000) if i % 2 == 0]
+    #La condition du filter peut évidemment être super compliquée et contenue dans une fonction
+    #Il faut que veutOnGarderValeur renvoie un booléen
+    [i * 2 for i in range(0,1000) if veutOnGarderValeur(i)]
+    #De la même façon, le map peut être très compliqué aussi
+    #monSuperMapper, à partir d'un i, renvoie quelque chose.
+    [monSuperMapper(i) for i in range(0,1000) if veutOnGarderValeur(i)]
+
+## Divertissement
+
+### Comparaison des performances de recherche dans un set, dans une liste, dans un dictionnaire
+
+1. Créer un script appelé lookupPerformanceComparison.py
+2. Créer une variable N et lui assigner la valeur 10000000 (10 millions).
+3. Créer une variable aRange avec tous les nombres entre 0 et N. Est-ce que c'est long ? Quel est le type de aRange ? Si on fait grandir encore N, combien de temps met la création ? Pensez-vous que les entiers sont matérialisés en RAM ou pas du tout ?
+4. Créer une variable aList en appliquant la fonction list à votre iterable aRange. list prend en input un iterable quelconque et renvoie une liste. L'iterable n'est pas changé. D'ailleurs ça transforme aussi une liste en une liste du coup.
+5. Créer une variable aSet en appliquant la fonction set à votre iterable aRange ou bien à aList d'ailleurs.
+6. Créer un dictionnaire aDict avec comme clefs les valeurs contenues dans aRange et comme valeur True. Donc le format de aDict est comme suit : `{1:True,2:True,...}`
+7. En cherchant comment faire de la dictionary comprehension, trouver comment faire la question 5 de façon élégante
+8. Créer une liste listOfIterables avec chacun de vos iterable aRange, aList, aSet, aDictionary. Votre liste aura 4 éléments
+9. Pour savoir si un élément `x` est dans un iterable `iterable` on peut faire `x in iterable` qui renvoie True ou False en fonction. Pour rappel sur les dictionnaires, la recherche se fait bien sur les clefs et non les valeurs. Créer une liste appelée listOfAnswers à partir de la liste listOfIterables par list comprehension où pour chaque élément de listOfIterables, qui est donc un iterable, vous regardez si entier (ou un autre objet d'ailleurs) que vous choisissez arbitrairement est bien présent ou non dans l'iterable. Est-il normal qu'il semble qu'ils donnent tous la même réponse à chaque fois ? listOfAnswers est censé être une liste de 4 booléens. True en premier élément de listOfAnswers indique que l'élément que vous avez demandé à chercher était bien présent dans aRange. etc.
+10. Est-ce que ça vous a paru rapide ?
+11. Python dispose nativement dans sa stdlib (comme sys) d'un package appelé time. En l'important, vous pourrez utiliser des fonctions qui y sont contenues notamment la fonction sleep. Tester de donner un entier (petit) à la fonction sleep et regardez le comportement.
+12. Le package time dispose aussi d'une fonction appelée... time ! Elle ne prend aucun paramètre et renvoie le timestamp courant.
+13. Créer une fonction timeToCheckIfInIterable qui prend deux paramètres : un iterable et une valeur. Ce qu'elle renvoie est un dictionnaire avec deux entrées : `timeDifference` (le temps mis pour faire le travail) et `inIterable` (un booléen). La time difference est obtenue en appelant la fonction time() au début de la fonction et en stockant cette valeur dans une variable start (par exemple). ON regarde ensuite si la valeur est dans l'iterable et refait un nouvel appel à la fonction time pour stocker ce résultat dans la variable end (par exemple). `end-start` est la time difference dont on parlait. On renvoie le booléen et cette time difference dans un dictionnaire et le compte est bon !
+14. A la place de listOfAnswers, créer listOfAnswersWithTimes et faites la même chose mais en appelant pour chaque iterable votre fonction timeToCheckIfInIterable. Conclure.
+
+### Consommer une API
+
+Python comme la plupart des langages de programmation est capable de dialoguer avec des serveurs HTTP(S) distants.
+
+Il est possible sur Slack de configurer ce qu'on appelle des Incoming Webhook.
+Ce qu'on récupère avec les Incoming Webhook c'est une URL ayant la forme : `https://hooks.slack.com/services/XXXX/TTTT/CCCCC`
+Il suffit de poster sur cette URL en RAW POST (verbe HTTP) ce genre de contenus (un objet JSON ayant la propriété text) :
+
+    {"text":"Hello World! I am a bot writing to Slack !"}
+
+Il convient de préciser un header Content-Type `application/json`.
+
+On peut aussi créer des contenus plus riches pour avoir carrément des tableaux, des cards, des couleurs (...). L'API Slack propose plein de choses pour customiser les messages. Ici, on y apprend plein de choses sur tout ça : https://api.slack.com/docs/outmoded-messaging
+
+1. Postman sert à faire des appels HTTP, il propose une interface pour faciliter l'envoi de requêtes HTTP. C'est un excellent outil ! Il propose même e faire du test d'intégration : des collections rejouables
+2. Créer la requête dans Postman qui permet d'écrire sur le channel en question.
+3. Exporter cette requête vers Python directement depuis Postman (magique !). Utiliser requests.
+4. requests est un package tiers : notre premier ! Pour installer un package tiers, on a besoin de pip ou pip3. Vérifier si vous en disposez directement en command line (pas dans l'interpréteur Python !). On va utiliser la même astuce pour se créer un container python avec partage de dossier sur notre dossier courant. Vérifier que dans le container on a bien pip et faire `pip install requests`
+5. Comprendre et adapter votre code source copié de Postman pour faire en sorte qu'il fonctionne.
+6. Créer une fonction writeToSlack qui à partir d'un texte écrit le texte sur VOTRE slack.
+7. Faire en sorte que writeToSlack prenne un second paramètre appelé url qui a pour valeur par défaut l'url de webhook de votre Slack.
+
+### Requêter une base de données
+
+1. Lancer un container mysql:5 en vous rendant sur le docker hub. Faire en sorte que ce container expose son port 3306 sur le port 3306 de votre hôte.
+2. Vous connecter à ce container depuis un client MySQL que vous auriez déjà d'installé sur votre machine. Vérifier que tout fonctionne bien en créant par exemple un schéma (database).
+3. Stopper le container mysql:5 précédent et créer un fichier docker-compose avec deux containers. Un container basé sur l'image mysql:5 et un container basé sur l'image python où vous redéfinirez la commande au lancement et mettrez `bash` ou `sleep infinity`. Faire en sorte que la base de données soit joignable depuis le port 3306 de votre hôte. Faire en sorte qu'il y ait un montage de dossier entre votre répertoire de travail python et le dossier /data de votre container python.
+4. Le container python peut-il dialoguer avec le container mysql ? Comment peuvent-ils se voir ?
+5. https://www.tutorialspoint.com/python3/python_database_access.htm indique comment on pourrait se connecter à une database depuis Python. En se connectant au container python, en installant ce qui est nécessaire d'installer, en créant un script .py avec le code source qui va bien, faire en sorte que la communication (on peut même parler de magie !) opère bien.
