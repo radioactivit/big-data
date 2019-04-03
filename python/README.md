@@ -475,3 +475,26 @@ On peut aussi créer des contenus plus riches pour avoir carrément des tableaux
 4. Reproduire la même chose sur les autres opérateurs classiques : multiplication `__mul__`, soustraction `__sub__` et division `__div__`.
 5. Si on a deux NumericVector n1 et n2 strictement différents (au sens pas les mêmes instances), on voudrait que n1 == n2 renvoie bien True. Est-ce le cas ? Implémenter la méthode `__eq__` pour faire en sorte que ça le soit. Saurait-on capable de créer une classe IAmDifferent qui fasse en sorte que deux variables pointant vers la MEME instance soient jugées... différentes ?
 6. On voudrait faire en sorte que quand on fait `6 in n1` où n1 est un NumericVector qui contient la valeur 6, ceci renvoie True. Et False sinon. On pourra définir la méthode `__contains__` ! Pourrait-on faire en sorte que même si 6 est bien dans n1, le in renvoie False ?
+
+## Décorateurs
+
+Un décorateur est une fonction.
+Un décorateur est une fonction qui prend en paramètre une autre fonction.
+Une décorateur est une fonction qui prend en paramètre une autre fonction et renvoie une troisième fonction.
+Le but d'un décorateur est d'altérer ou compléter le comportement d'une fonction.
+
+### Décorateur à la mano ?
+
+1. Définir une fonction loggerDebutFin qui prend un seul paramètre qui est attendu de type fonction. Nommons-là `aFunction`
+2. Vérifier que ce qu'elle reçoit en entrée est bien une fonction, par exemple en utilisant la fonction assert. Comment fait-on ?
+3. Dans loggerDebutFin, créer une fonction appelée wrapper. Cette fonction fait quatre choses très simples : elle affiche dans la console "Début de la fonction". Elle appelle la fonction aFunction sans paramètres donc aFunction() et stocke le résultat dans une variable result. Elle affiche ensuite dans la console "Fin de la fonction". Puis elle retourne result.
+4. Dans loggerDebutFin, renvoyer la fonction wrapper créée. loggerDebutFin prend aFunction en paramètre et renvoie wrapper qui est une AUTRE fonction. Cette autre fonction va appeler la fonction aFunction.
+5. Dans la suite du script, taper ceci : `newListFunction = loggerDebutFin(list)`. Puis faire `newListFunction(range(0,10))`. Que se passe-t-il ? On a créé une nouvelle fonction list qui a le même comportement que l'orinal sauf qu'on a rajouté un log au début et à la fin !
+
+### Décorateur pas à la mano
+
+On compte sur le fait que loggerDebutFin soit toujours défini (restons dans le même script)
+
+1. Créer n'importe quelle fonction
+2. Rajouter au dessus du `def myFunctionName` ceci : `@loggerDebutFin`
+3. Executer myFunctionName
