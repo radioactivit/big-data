@@ -20,10 +20,8 @@ def test_fibonacci():
 
 
 def test_NumericVector_initialization():
-    someIterables = [range(0, 23), list(range(0, 18)),
-                     (i + 4 for i in range(90, 104))]
+    someIterables = [range(0, 23), list(range(0, 18)),range(90, 104)]
     for anIterable in someIterables:
-        anIterable = range(0, 23)
         anIterableAsList = list(anIterable)
         n1 = NumericVector(anIterable)
         assert isinstance(n1, Vector)
