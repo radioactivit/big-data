@@ -88,7 +88,7 @@ generateRandomStrings(10000,10000)
 generateRandomStrings(10,20)
 ...
 
-Créer une fonction `tesCardinalityApproximation` qui ne prend aucun paramètre et qui va :
+Créer une fonction `testCardinalityApproximation` qui ne prend aucun paramètre et qui va :
 
 - choisir 100 paires aléatoires. Le premier nombre doit être en 1 et 100 000. Le second entre le premier et 100 000 (inclus)
 - appeler pour chaque paire `generateRandomStrings` puis appeler `cardinalityApproximation`. Connaît-on à l'avance la vraie réponse à la cardinalité ? Etudier la différence entre l'estimation et la réalité
@@ -117,4 +117,35 @@ Le principe sera le suivant :
 Tester à nouveau `cardinalityApproximation2` avec nos méthodes de test. Que conclure ?
 Tester avec les trailing 0, leading 1...
 
-## LogLog
+## LogLog v1
+
+### Concept
+
+Et si on utilisait plusieurs estimateurs à la fois ?
+
+L'idée consiste à dire qu'on va appliquer la même stratégie que précédemment.
+
+Au détail près que pour déterminer le nombre (réel) dont on va faire 2^(moyenne des nombres), on va demander à plusieurs fonctions de hash ce qu'elles en pensent.
+
+### Implémentation
+
+Comment générer plusieurs fonctions de hash ?
+
+Un trick qui fera le boulot pour aujourd'hui consiste à faire ce qui suit : mettre un salt avant de hasher une chaîne de caractères revient à avoir... Une autre fonction de hashage !
+
+Créer une fonction `generateHashFunctions` qui prend en paramètre un nombre N et va renvoyer N fonctions de hashage. Après tout, on sait faire de la programmation fonctionnelle, non ?
+
+Faire en sorte de réaliser le traitement précédent pour chaque fonction de hashage et élever à la puissance n la moyenne de leur résultat !
+
+## LogLog v2
+
+### Concept
+
+Plutôt que de faire appel à N fonctions de hashage, on va à nouveau en utiliser une seule.
+
+On va dédier les X premiers caractères de la chaîne hexadécimale retournée et considérer que ça représente un nombre en 0 et 2^X. On va associer 2^X "buckets".
+Chaque tirage de hash sera associé à un unique bucket qui n'aura qu'une chose à retenir : le nombre maximum de 0 finaux consécutifs qu'il a vus passer !
+
+### Implémentation
+
+Implémenter le produit en fixant le nombre de buckets à 16 puis en le rendant paramétrable.
