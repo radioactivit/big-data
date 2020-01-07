@@ -99,6 +99,12 @@ L'estimateur fonctionne mais il paraît fragile. On va l'améliorer.
 
 ### Concept
 
+Plutôt que de jouer sur des nombres entre 0 et 1 et de prendre des valeurs extremales, on va plutôt considérer tous les hashs et faire un focus plus particulier sur les leading 0.
+
+Bien évidemment, si on regardait les leading 1 ou les leading a, ce serait la même chose (mais pas pour les leading z...).
+
+Si on regardait les trailing 0, ce serait évidemment identique également !
+
 ### Implémentation
 
 Créer `cardinalityApproximation2` qui prend les mêmes paramètres.
@@ -109,3 +115,6 @@ Le principe sera le suivant :
 - répondre en faisant simplement 2^{{ce nombre}}
 
 Tester à nouveau `cardinalityApproximation2` avec nos méthodes de test. Que conclure ?
+Tester avec les trailing 0, leading 1...
+
+## LogLog
