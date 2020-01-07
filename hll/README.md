@@ -111,6 +111,7 @@ Créer `cardinalityApproximation2` qui prend les mêmes paramètres.
 Le principe sera le suivant :
 
 - pour chaque élément en entrée, prendre son hash md5 (la représentation en hexastring)
+- le transforme en le hash binaire
 - identifier le hash ayant le plus grand nombre de 0 en préfixe.
 - répondre en faisant simplement 2^{{ce nombre}}
 
